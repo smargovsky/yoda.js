@@ -30,8 +30,8 @@ class Yoda {
 
       // // let popTag = window.document.createElement('div')
       // // popTag.innerHTML = '<p>hello</p>';
-      let maybePrev = true ? '<span class="previous">\<</span>' : '';
-      let maybeNext = true ? '<span class="next">\></span>': '';
+      let maybePrev = index > 0 ? '<span class="previous">\<</span>' : '';
+      let maybeNext = wizard.steps.length - 1 > index ? '<span class="next">\></span>': '';
 
       let popTag = $('<div class="yoda-popper">' 
         + content
