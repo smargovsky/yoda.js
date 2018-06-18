@@ -1,51 +1,84 @@
 
 import Popper from 'popper.js'
-class yoda {
+class Yoda {
 
-  greet() {
-  }
 
-  bootstrapExists() {
-    return (typeof $().modal === 'function');
-  }
-
-  static displayPopperWithHtml(selector, inputHTML) {
-    //test
-    let testReference = $(selector)
-
-    // // let popTag = window.document.createElement('div')
-    // // popTag.innerHTML = '<p>hello</p>';
-    let popTag = $('<div class="yoda-popper">' + inputHTML + '<div class="popper__arrow" x-arrow=""></div></div>');
-
-    $('body').append(popTag);
-
-    window.pop = new Popper(testReference, popTag, {
-      placement: 'left',
-      modifiers: {
-        arrow: {
-          enabled: true
-        }
-      },
-      removeOnDestroy: true,
-      offset: {
-        enabled: true,
-        offset: '0,10'
+  fetchWizard() {
+    return Promise.resolve(
+      {
+        title: "titsle",
+        steps: [
+          {
+            selector: '.section-header',
+            content: '<div> WIZARDS</div>'
+          },
+          {
+            selector: '.breadcrumbs',
+            content: '<div> WIZARDS EVERYWHERE </div>'
+          }
+        ]
       }
+    );
+  }
 
+  displayPopperWithHtml(wizard, index) {
+    let {selector, content} = wizard.steps[index]
+  // displayPopperWithHtml(selector, inputHTML) {
+    //test
+    this.whenExists(selector, () => {
+      let testReference = $(selector)
+
+      // // let popTag = window.document.createElement('div')
+      // // popTag.innerHTML = '<p>hello</p>';
+      let maybePrev = true ? '<span class="previous">\<</span>' : '';
+      let maybeNext = true ? '<span class="next">\></span>': '';
+
+      let popTag = $('<div class="yoda-popper">' 
+        + content
+        + maybePrev
+        + maybeNext
+        + '<div class="popper__arrow" x-arrow=""></div></div>');
+
+      $('body').append(popTag);
+
+      popTag.find('.next').on('click', this.nextWizard.bind(this));
+      popTag.find('.previous').on('click', this.previousWizard.bind(this));
+
+      this.currentPop = new Popper(testReference, popTag, {
+        placement: 'left',
+        modifiers: {
+          arrow: {
+            enabled: true
+          }
+        },
+        removeOnDestroy: true,
+        offset: {
+          enabled: true,
+          offset: '0,10'
+        }
+
+      });
     });
   }
 
 
-  static whenExists(selector, cb) {
+  whenExists(selector, cb) {
+    let timesChecked = 0;
     let checkExistance = setInterval(function() {
       if ($(selector).length) {
         cb()
         clearInterval(checkExistance);
+      } else {
+        timesChecked++; 
+        if (timesChecked > 200) {
+          console.warn('Couldnt find element to attach yoda after 20 seconds, giving up')
+          clearInterval(checkExistance);
+        }
       }
-    }, 500);
+    }, 100);
   }
 
-  static setupStyles() {
+  setupStyles() {
     $(`<style type='text/css'> 
       .yoda-popper {
         background: #ffc107;
@@ -108,14 +141,46 @@ class yoda {
         margin-left: 0;
         margin-right: 0;
       }
+
+      .yoda-popper .previous {
+        float: left
+      }
+
+      .yoda-popper .next {
+        float: right
+      }
       </style>`).appendTo("head");
+  }
+
+  init() {
+    yoda.setupStyles();
+    this.fetchWizard().then( (fetchedWizard) => {
+      this.wizardIndex = 0;
+      this.wizard = fetchedWizard;
+      this.displayPopperWithHtml(this.wizard, this.wizardIndex);
+    });
+    // this.fetchAnnouncement().then( fe)
+  }
+
+  nextWizard() {
+    this.wizardIndex++;
+    this.currentPop.destroy();
+    this.displayPopperWithHtml(this.wizard, this.wizardIndex);
+  }
+
+  previousWizard() {
+    this.wizardIndex--;
+    this.currentPop.destroy();
+    this.displayPopperWithHtml(this.wizard, this.wizardIndex);
   }
 
 }
 
-yoda.setupStyles();
-yoda.whenExists('.section-header', () => {
-  yoda.displayPopperWithHtml('.section-header', '<div>Food</div>')
-});
+let yoda = new Yoda
+yoda.init()
+// yoda.setupStyles();
+// yoda.whenExists('.section-header', () => {
+//   yoda.displayPopperWithHtml('.section-header', '<div>Food</div>')
+// });
 
 export default yoda;
