@@ -53,5 +53,8 @@
   "babelBoilerplateOptions": {
     "entryFileName": "yoda.js",
     "mainVarName": "yoda"
+  },
+  "dependencies": {
+    "popper.js": "^1.14.3"
   }
 }

@@ -11,8 +11,5 @@ describe('yoda', () => {
       expect(yoda.greet).to.have.been.calledOnce;
     });
 
-    it('should have always returned hello', () => {
-      expect(yoda.greet).to.have.always.returned('hello');
-    });
   });
 });
