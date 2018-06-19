@@ -1,6 +1,6 @@
 
 import Popper from 'popper.js'
-class Yoda {
+export class Yoda {
 
 
   // fetchGuide() {
@@ -189,7 +189,6 @@ class Yoda {
       </style>`).appendTo("head");
   }
 
-  //TODO: 
   init(getUserAndPermissions, apiHost) {
 
     this.apiHost = apiHost;
@@ -224,11 +223,12 @@ class Yoda {
 
 }
 
-let yoda = new Yoda
-yoda.init(() => {return Promise.resolve({userHash: 'stub', permissions: []})}, 'https://docs.test/wp-json/api/v1' )
+
+export let yoda = new Yoda();
+// export let yoda = new Yoda()
+// window.yoda = new Yoda();
+// yoda.init(() => {return Promise.resolve({userHash: 'stub', permissions: []})}, 'https://docs.test/wp-json/api/v1' )
 // yoda.setupStyles();
 // yoda.whenExists('.section-header', () => {
 //   yoda.displayPopperWithHtml('.section-header', '<div>Food</div>')
 // });
-
-export default yoda;
