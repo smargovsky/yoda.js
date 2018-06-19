@@ -3,26 +3,34 @@ import Popper from 'popper.js'
 class Yoda {
 
 
-  fetchWizard() {
-    return Promise.resolve(
-      {
-        title: "titsle",
-        steps: [
-          {
-            selector: '.section-header',
-            content: '<div> WIZARDS</div>'
-          },
-          {
-            selector: '.breadcrumbs',
-            content: '<div> WIZARDS EVERYWHERE </div>'
-          }
-        ]
-      }
-    );
+  // fetchGuide() {
+  //   return Promise.resolve(
+  //     {
+  //       title: "titsle",
+  //       steps: [
+  //         {
+  //           selector: '.section-header',
+  //           content: '<div> WIZARDS</div>'
+  //         },
+  //         {
+  //           selector: '.breadcrumbs',
+  //           content: '<div> WIZARDS EVERYWHERE </div>'
+  //         }
+  //       ]
+  //     }
+  //   );
+  // }
+
+  fetchGuide(userHash, permissions) {
+    return $.get(this.guideApiHost 
+          + '/guide?userHash=' + userHash 
+          + '&permissions=' + permissions.join(',') 
+          + '&route=' + encodeURIComponent(location.pathname+location.hash)
+    )
   }
 
-  displayPopperWithHtml(wizard, index) {
-    let {selector, content} = wizard.steps[index]
+  displayPopperWithHtml(guide, index) {
+    let {selector, content} = guide.steps[index]
   // displayPopperWithHtml(selector, inputHTML) {
     //test
     this.whenExists(selector, () => {
@@ -31,7 +39,7 @@ class Yoda {
       // // let popTag = window.document.createElement('div')
       // // popTag.innerHTML = '<p>hello</p>';
       let maybePrev = index > 0 ? '<span class="previous">\<</span>' : '';
-      let maybeNext = wizard.steps.length - 1 > index ? '<span class="next">\></span>': '';
+      let maybeNext = guide.steps.length - 1 > index ? '<span class="next">\></span>': '';
 
       let popTag = $('<div class="yoda-popper">' 
         + content
@@ -41,8 +49,8 @@ class Yoda {
 
       $('body').append(popTag);
 
-      popTag.find('.next').on('click', this.nextWizard.bind(this));
-      popTag.find('.previous').on('click', this.previousWizard.bind(this));
+      popTag.find('.next').on('click', this.nextGuide.bind(this));
+      popTag.find('.previous').on('click', this.previousGuide.bind(this));
 
       this.currentPop = new Popper(testReference, popTag, {
         placement: 'left',
@@ -56,7 +64,6 @@ class Yoda {
           enabled: true,
           offset: '0,10'
         }
-
       });
     });
   }
@@ -152,26 +159,35 @@ class Yoda {
       </style>`).appendTo("head");
   }
 
-  init() {
-    yoda.setupStyles();
-    this.fetchWizard().then( (fetchedWizard) => {
-      this.wizardIndex = 0;
-      this.wizard = fetchedWizard;
-      this.displayPopperWithHtml(this.wizard, this.wizardIndex);
+  //TODO: 
+  init(getUserAndPermissions) {
+
+    getUserAndPermissions().then( (userAndPermissions) => {
+      let {userHash, permissions} = userAndPermissions
+
+      if (!userHash || !permissions) {
+        throw Error('getUserAndPermissions must return a promise to an object of the form {userHash: ___, permissions: ___}')
+      }
+
+      yoda.setupStyles();
+      this.fetchGuide(userHash, permissions).then( (fetchedGuide) => {
+        this.guideIndex = 0;
+        this.guide = fetchedGuide;
+        this.displayPopperWithHtml(this.guide, this.guideIndex);
+      });
     });
-    // this.fetchAnnouncement().then( fe)
   }
 
-  nextWizard() {
-    this.wizardIndex++;
+  nextGuide() {
+    this.guideIndex++;
     this.currentPop.destroy();
-    this.displayPopperWithHtml(this.wizard, this.wizardIndex);
+    this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
-  previousWizard() {
-    this.wizardIndex--;
+  previousGuide() {
+    this.guideIndex--;
     this.currentPop.destroy();
-    this.displayPopperWithHtml(this.wizard, this.wizardIndex);
+    this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
 }
