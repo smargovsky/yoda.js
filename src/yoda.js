@@ -22,11 +22,13 @@ class Yoda {
   // }
 
   fetchGuide(userHash, permissions) {
-    return $.get(this.guideApiHost 
-          + '/guide?userHash=' + userHash 
+    return $.get(this.apiHost 
+          + '/guides?userHash=' + userHash 
           + '&permissions=' + permissions.join(',') 
-          + '&route=' + encodeURIComponent(location.pathname+location.hash)
-    )
+          + '&route=' + encodeURIComponent(location.pathname+location.hash))
+      .then((guides) => {
+        return guides[0];
+      })
   }
 
   displayPopperWithHtml(guide, index) {
@@ -38,8 +40,8 @@ class Yoda {
 
       // // let popTag = window.document.createElement('div')
       // // popTag.innerHTML = '<p>hello</p>';
-      let maybePrev = index > 0 ? '<span class="previous">\<</span>' : '';
-      let maybeNext = guide.steps.length - 1 > index ? '<span class="next">\></span>': '';
+      let maybePrev = index > 0 ? '<button class="previous btn-sm btn-default">Prev</span>' : '';
+      let maybeNext = guide.steps.length - 1 > index ? '<button class="next btn-sm btn-primary">Next</span>': '';
 
       let popTag = $('<div class="yoda-popper">' 
         + content
@@ -87,11 +89,39 @@ class Yoda {
 
   setupStyles() {
     $(`<style type='text/css'> 
+      .btn-primary {
+        background-color: transparent;
+        border-color: #4b9eb9;
+        color: #ffffff;
+        text-shadow: none;
+        background-image: -webkit-linear-gradient(top, #61b8d4 0%, #4a9cb6 100%);
+        background-image: linear-gradient(to bottom, #61b8d4 0%, #4a9cb6 100%);
+        background-repeat: repeat-x;
+      }
+      .btn-sm {
+        padding: 5px 10px;
+        font-size: 12px;
+        line-height: 1.5;
+        border-radius: 3px;
+        margin-top: 5px;
+      }
+      .btn-default {
+        border-color: #b8b8b8;
+        color: #333333;
+        text-shadow: none;
+        background-image: -webkit-linear-gradient(top, #f7f7f7 0%, #e5e5e5 100%);
+        background-image: linear-gradient(to bottom, #f7f7f7 0%, #e5e5e5 100%);
+        background-repeat: repeat-x;
+      }
       .yoda-popper {
-        background: #ffc107;
+        background: #ffffff;
         padding: 10px;
         text-align: center;
         border-radius: 5px;
+        font-family: "Lato", “HelveticaNeue”, “Helvetica”, “Arial”, sans-serif;
+        -webkit-box-shadow: 10px 10px 42px -6px rgba(0,0,0,0.75);
+        -moz-box-shadow: 10px 10px 42px -6px rgba(0,0,0,0.75);
+        box-shadow: 10px 10px 42px -6px rgba(0,0,0,0.75);
       }
       .yoda-popper .popper__arrow {
         width: 0;
@@ -106,7 +136,7 @@ class Yoda {
       }
       .yoda-popper[x-placement^=top] .popper__arrow {
         border-width: 5px 5px 0 5px;
-        border-color: #ffc107 transparent transparent transparent;
+        border-color: #ffffff transparent transparent transparent;
         bottom: -5px;
         left: calc(50% - 5px);
         margin-top: 0;
@@ -118,7 +148,7 @@ class Yoda {
       }
       .yoda-popper[x-placement^=bottom] .popper__arrow {
         border-width: 0 5px 5px 5px;
-        border-color: transparent transparent #ffc107 transparent;
+        border-color: transparent transparent #ffffff transparent;
         top: -5px;
         left: calc(50% - 5px);
         margin-top: 0;
@@ -130,7 +160,7 @@ class Yoda {
       }
       .yoda-popper[x-placement^=right] .popper__arrow {
         border-width: 5px 5px 5px 0;
-        border-color: transparent #ffc107 transparent transparent;
+        border-color: transparent #ffffff transparent transparent;
         left: -5px;
         top: calc(50% - 5px);
         margin-left: 0;
@@ -142,7 +172,7 @@ class Yoda {
       }
       .yoda-popper[x-placement^=left] .popper__arrow {
         border-width: 5px 0 5px 5px;
-        border-color: transparent transparent transparent #ffc107;
+        border-color: transparent transparent transparent #ffffff;
         right: -5px;
         top: calc(50% - 5px);
         margin-left: 0;
@@ -160,7 +190,9 @@ class Yoda {
   }
 
   //TODO: 
-  init(getUserAndPermissions) {
+  init(getUserAndPermissions, apiHost) {
+
+    this.apiHost = apiHost;
 
     getUserAndPermissions().then( (userAndPermissions) => {
       let {userHash, permissions} = userAndPermissions
@@ -193,7 +225,7 @@ class Yoda {
 }
 
 let yoda = new Yoda
-yoda.init()
+yoda.init(() => {return Promise.resolve({userHash: 'stub', permissions: []})}, 'https://docs.test/wp-json/api/v1' )
 // yoda.setupStyles();
 // yoda.whenExists('.section-header', () => {
 //   yoda.displayPopperWithHtml('.section-header', '<div>Food</div>')
