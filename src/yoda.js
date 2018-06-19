@@ -22,13 +22,12 @@ export class Yoda {
   // }
 
   fetchGuide(userHash, permissions) {
-    return $.get(this.apiHost 
-          + '/guides?userHash=' + userHash 
-          + '&permissions=' + permissions.join(',') 
-          + '&route=' + encodeURIComponent(location.pathname+location.hash))
+    return $.post(this.apiHost + '/guides', 
+      {userHash, permissions, route: location.pathname + location.hash})
       .then((guides) => {
         return guides[0];
       })
+      .catch((err) => console.error(e));
   }
 
   displayPopperWithHtml(guide, index) {
@@ -41,7 +40,7 @@ export class Yoda {
       // // let popTag = window.document.createElement('div')
       // // popTag.innerHTML = '<p>hello</p>';
       let maybePrev = index > 0 ? '<button class="previous btn-sm btn-default">Prev</span>' : '';
-      let maybeNext = guide.steps.length - 1 > index ? '<button class="next btn-sm btn-primary">Next</span>': '';
+      let maybeNext = guide.steps.length - 1 > index ? '<button class="next btn-sm btn-primary">Next</span>': '<button class="finish btn-sm btn-primary">Finish</span>';
 
       let popTag = $('<div class="yoda-popper">' 
         + content
@@ -52,6 +51,7 @@ export class Yoda {
       $('body').append(popTag);
 
       popTag.find('.next').on('click', this.nextGuide.bind(this));
+      popTag.find('.finish').on('click', this.finishGuide.bind(this));
       popTag.find('.previous').on('click', this.previousGuide.bind(this));
 
       this.currentPop = new Popper(testReference, popTag, {
@@ -186,6 +186,10 @@ export class Yoda {
       .yoda-popper .next {
         float: right
       }
+
+      .yoda-popper .finish {
+        float: right
+      }
       </style>`).appendTo("head");
   }
 
@@ -205,6 +209,7 @@ export class Yoda {
         this.guideIndex = 0;
         this.guide = fetchedGuide;
         this.displayPopperWithHtml(this.guide, this.guideIndex);
+        // this.enterElementHighlightMode();
       });
     });
   }
@@ -215,13 +220,68 @@ export class Yoda {
     this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
+  finishGuide() {
+    this.currentPop.destroy()
+  }
+
   previousGuide() {
     this.guideIndex--;
     this.currentPop.destroy();
     this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
+  enterElementHighlightMode() {
+
+    let cssPath = function(el) {
+      if (!(el instanceof Element)) 
+          return;
+      let path = [];
+      while (el.nodeType === Node.ELEMENT_NODE) {
+          let selector = el.nodeName.toLowerCase();
+          if (el.id) {
+              selector += '#' + el.id;
+              path.unshift(selector);
+              break;
+          } else {
+              var sib = el, nth = 1;
+              while (sib = sib.previousElementSibling) {
+                  if (sib.nodeName.toLowerCase() == selector)
+                     nth++;
+              }
+              if (nth != 1)
+                  selector += ":nth-of-type("+nth+")";
+          }
+          path.unshift(selector);
+          el = el.parentNode;
+      }
+      return path.join(" > ");
+    }
+
+    let previousEl = null;
+    let previousBackground = null
+    $(document).on('mousemove', ({clientX, clientY}) => {
+      let el = $(document.elementFromPoint(clientX, clientY));
+      if (previousEl) {
+        previousEl.css('background', previousBackground);
+      }
+      previousBackground = el.css('background');
+      el.css('background', 'lightskyblue');
+      previousEl = el;
+    })
+
+    $(document).on('click', (e) => {
+      console.log(cssPath(previousEl[0]));
+      e.stopPropagation();
+      e.preventDefault();
+      $(document).off('click');
+      $(document).off('mousemove');
+      previousEl.css('background', previousBackground);
+    })
+  }
+
 }
+
+
 
 
 export let yoda = new Yoda();
