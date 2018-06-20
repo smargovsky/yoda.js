@@ -23,18 +23,42 @@ export class Yoda {
   // }
 
   fetchGuide(userHash, permissions) {
-    return $.post(this.apiHost + '/guides', 
-      {userHash, permissions, route: location.pathname + location.hash})
-      .then((guides) => {
-        return guides[0];
-      })
-      .catch((err) => console.error(e));
+
+    // $.ajax({
+    //   type: 'POST',
+    //   url: this.apiHost + '/guides/' + this.guide.id,
+    //   data: JSON.stringify({
+    //     user_id: this.userHash,
+    //     completed: true
+    //   }),
+    //   dataType: 'json',
+    //   contentType: 'application/json; charset=utf-8'
+    // })
+    return $.ajax({
+      type: 'POST',
+      url: this.apiHost + '/guides',
+      data: JSON.stringify({
+        'user_id': userHash, 
+        permissions, 
+        route: location.pathname + location.hash,
+        locale: 'en'
+      }),
+      dataType: 'json',
+      contentType: 'application/json; charset=utf-8'
+    })
+
+    // return $.post(this.apiHost + '/guides', 
+    //   {userHash, permissions, route: location.pathname + location.hash})
+    //   .then((guides) => {
+    //     return guides[0];
+    //   })
+    //   .catch((err) => console.error(e));
   }
 
   displayPopperWithHtml(guide, index) {
     let {selector, content} = guide.steps[index]
     this.whenExists(selector, () => {
-      let testReference = $(selector)
+      let testReference = $(selector)[0]
 
       let maybePrev = index > 0 ? '<button class="previous btn-sm btn-default">Prev</span>' : '';
       let maybeNext = guide.steps.length - 1 > index ? '<button class="next btn-sm btn-primary">Next</span>': '<button class="finish btn-sm btn-primary">Finish</span>';
@@ -234,12 +258,6 @@ export class Yoda {
 
   finishGuide() {
     this.currentPop.destroy()
-    // $.post(this.apiHost + '/guides/' +  this.guide.id, 
-
-    //         JSON.stringify({
-    //           user_id: this.userHash, 
-    //           completed:true
-    //       }), ()=>{}, 'application/json');
     $.ajax({
       type: 'POST',
       url: this.apiHost + '/guides/' + this.guide.id,
@@ -287,23 +305,24 @@ export class Yoda {
       let path = [];
       while (el.nodeType === Node.ELEMENT_NODE) {
           let selector = el.nodeName.toLowerCase();
-          if (el.id) {
-              selector += '#' + el.id;
+          if (el.classList) {
+              selector += '.' + Array.from(el.classList).join('.');
               path.unshift(selector);
               break;
-          } else {
-              var sib = el, nth = 1;
-              while (sib = sib.previousElementSibling) {
-                  if (sib.nodeName.toLowerCase() == selector)
-                     nth++;
-              }
-              if (nth != 1)
-                  selector += ":nth-of-type("+nth+")";
+          // } else {
+          var sib = el, nth = 1;
+          while (sib = sib.previousElementSibling) {
+              if (sib.nodeName.toLowerCase() == selector)
+                  nth++;
+          }
+          if (nth != 1)
+              selector += ":nth-of-type("+nth+")";
           }
           path.unshift(selector);
           el = el.parentNode;
       }
-      return path.join(" > ");
+      let fullSelector = path.join(" > ");
+      return fullSelector;
     }
 
     let previousEl = null;
