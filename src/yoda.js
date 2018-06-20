@@ -312,12 +312,13 @@ export class Yoda {
       let path = [];
       while (el.nodeType === Node.ELEMENT_NODE) {
           let selector = el.nodeName.toLowerCase();
+          let tagName = selector;
           if (el.classList.length) {
               selector += '.' + Array.from(el.classList).join('.');
           }
           var sib = el, nth = 1;
           while (sib = sib.previousElementSibling) {
-              if (sib.nodeName.toLowerCase() == selector)
+              if (sib.nodeName.toLowerCase() === tagName)
                   nth++;
           }
           if (nth != 1) {
