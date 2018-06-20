@@ -1,5 +1,6 @@
-
+import {calcMD5} from './md5';
 import Popper from 'popper.js'
+
 export class Yoda {
 
 
@@ -205,14 +206,18 @@ export class Yoda {
     this.sendReady();
 
     getUserAndPermissions().then( (userAndPermissions) => {
-      let {userHash, permissions} = userAndPermissions
+      let {userId, permissions} = userAndPermissions
 
-      if (!userHash || !permissions) {
-        throw Error('getUserAndPermissions must return a promise to an object of the form {userHash: ___, permissions: ___}')
+      if (!userId || !permissions) {
+        throw Error('getUserAndPermissions must return a promise to an object of the form {userId: ___, permissions: ___}')
       }
 
+      this.userHash = calcMD5(userId);
+      this.permissions = permissions;
+
+
       yoda.setupStyles();
-      this.fetchGuide(userHash, permissions).then( (fetchedGuide) => {
+      this.fetchGuide(this.userHash, this.permissions).then( (fetchedGuide) => {
         this.guideIndex = 0;
         this.guide = fetchedGuide;
         this.displayPopperWithHtml(this.guide, this.guideIndex);
@@ -229,6 +234,11 @@ export class Yoda {
 
   finishGuide() {
     this.currentPop.destroy()
+    $.post(this.apiHost + 'guides/' +  this.guide.id, 
+            {
+              user_id: this.userHash, 
+              completed:true
+            });
   }
 
   previousGuide() {
