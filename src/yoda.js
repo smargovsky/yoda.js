@@ -261,7 +261,9 @@ export class Yoda {
   receiveMessage({data}) {
     let {yodaMessage} = data;
     if (yodaMessage === 'select-mode') {
-      this.currentPop.destroy();
+      if(this.currentPop) {
+        this.currentPop.destroy();
+      }
       this.enterElementHighlightMode();
     }
   }
