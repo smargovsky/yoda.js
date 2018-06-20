@@ -234,11 +234,22 @@ export class Yoda {
 
   finishGuide() {
     this.currentPop.destroy()
-    $.post(this.apiHost + 'guides/' +  this.guide.id, 
-            {
-              user_id: this.userHash, 
-              completed:true
-            });
+    // $.post(this.apiHost + '/guides/' +  this.guide.id, 
+
+    //         JSON.stringify({
+    //           user_id: this.userHash, 
+    //           completed:true
+    //       }), ()=>{}, 'application/json');
+    $.ajax({
+      type: 'POST',
+      url: this.apiHost + '/guides/' + this.guide.id,
+      data: JSON.stringify({
+        user_id: this.userHash,
+        completed: true
+      }),
+      dataType: 'json',
+      contentType: 'application/json; charset=utf-8'
+    })
   }
 
   previousGuide() {
