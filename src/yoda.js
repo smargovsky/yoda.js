@@ -22,7 +22,7 @@ export class Yoda {
   //   );
   // }
 
-  fetchGuide(userHash, permissions) {
+  fetchGuide(userHash, permissions, locale) {
 
     // $.ajax({
     //   type: 'POST',
@@ -34,6 +34,9 @@ export class Yoda {
     //   dataType: 'json',
     //   contentType: 'application/json; charset=utf-8'
     // })
+    if (!locale) {
+      locale = 'en';
+    }
     return $.ajax({
       type: 'POST',
       url: this.apiHost + '/guides',
@@ -41,7 +44,7 @@ export class Yoda {
         'user_id': userHash, 
         permissions, 
         route: location.pathname + location.hash,
-        locale: 'en'
+        locale: locale
       }),
       dataType: 'json',
       contentType: 'application/json; charset=utf-8'
@@ -233,7 +236,7 @@ export class Yoda {
     this.sendReady();
 
     getUserAndPermissions().then( (userAndPermissions) => {
-      let {userId, permissions} = userAndPermissions
+      let {userId, permissions, locale} = userAndPermissions
 
       if (!userId || !permissions) {
         throw Error('getUserAndPermissions must return a promise to an object of the form {userId: ___, permissions: ___}')
@@ -241,10 +244,11 @@ export class Yoda {
 
       this.userHash = calcMD5(userId);
       this.permissions = permissions;
+      this.locale = locale;
 
 
       yoda.setupStyles();
-      this.fetchGuide(this.userHash, this.permissions).then( (fetchedGuide) => {
+      this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
         this.guideIndex = 0;
         this.guide = fetchedGuide;
         this.displayPopperWithHtml(this.guide, this.guideIndex);
