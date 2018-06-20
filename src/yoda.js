@@ -46,6 +46,9 @@ export class Yoda {
       dataType: 'json',
       contentType: 'application/json; charset=utf-8'
     })
+    .then((guides) => {
+      return guides[0];
+    })
 
     // return $.post(this.apiHost + '/guides', 
     //   {userHash, permissions, route: location.pathname + location.hash})
@@ -305,17 +308,15 @@ export class Yoda {
       let path = [];
       while (el.nodeType === Node.ELEMENT_NODE) {
           let selector = el.nodeName.toLowerCase();
-          if (el.classList) {
+          if (el.classList.length) {
               selector += '.' + Array.from(el.classList).join('.');
-              path.unshift(selector);
-              break;
-          // } else {
+          }
           var sib = el, nth = 1;
           while (sib = sib.previousElementSibling) {
               if (sib.nodeName.toLowerCase() == selector)
                   nth++;
           }
-          if (nth != 1)
+          if (nth != 1) {
               selector += ":nth-of-type("+nth+")";
           }
           path.unshift(selector);
