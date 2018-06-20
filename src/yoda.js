@@ -32,20 +32,20 @@ export class Yoda {
 
   displayPopperWithHtml(guide, index) {
     let {selector, content} = guide.steps[index]
-  // displayPopperWithHtml(selector, inputHTML) {
-    //test
     this.whenExists(selector, () => {
       let testReference = $(selector)
 
-      // // let popTag = window.document.createElement('div')
-      // // popTag.innerHTML = '<p>hello</p>';
       let maybePrev = index > 0 ? '<button class="previous btn-sm btn-default">Prev</span>' : '';
       let maybeNext = guide.steps.length - 1 > index ? '<button class="next btn-sm btn-primary">Next</span>': '<button class="finish btn-sm btn-primary">Finish</span>';
 
       let popTag = $('<div class="yoda-popper">' 
+        + '<div>'
         + content
+        + '</div>'
+        + '<div class=btn-container>'
         + maybePrev
         + maybeNext
+        + '</div>'
         + '<div class="popper__arrow" x-arrow=""></div></div>');
 
       $('body').append(popTag);
@@ -71,7 +71,7 @@ export class Yoda {
   }
 
 
-  whenExists(selector, cb) {
+  whenExists(selector, cb, waitTime) {
     let timesChecked = 0;
     let checkExistance = setInterval(function() {
       if ($(selector).length) {
@@ -113,10 +113,15 @@ export class Yoda {
         background-image: linear-gradient(to bottom, #f7f7f7 0%, #e5e5e5 100%);
         background-repeat: repeat-x;
       }
+      .btn-container {
+        width: 100%;
+        
+      }
       .yoda-popper {
         background: #ffffff;
         padding: 10px;
-        text-align: center;
+        max-width: 200px;
+        text-align: left;
         border-radius: 5px;
         font-family: "Lato", “HelveticaNeue”, “Helvetica”, “Arial”, sans-serif;
         -webkit-box-shadow: 10px 10px 42px -6px rgba(0,0,0,0.75);
@@ -197,6 +202,8 @@ export class Yoda {
 
     this.apiHost = apiHost;
 
+    this.sendReady();
+
     getUserAndPermissions().then( (userAndPermissions) => {
       let {userHash, permissions} = userAndPermissions
 
@@ -228,6 +235,25 @@ export class Yoda {
     this.guideIndex--;
     this.currentPop.destroy();
     this.displayPopperWithHtml(this.guide, this.guideIndex);
+  }
+
+  ////
+  // SETTING UP SELECTORS
+  ////
+
+  sendReady() {
+    parent.postMessage({yodaMessage: 'iframe-ready'}, '*')
+
+    // Listen for select mode
+    window.addEventListener('message', this.receiveMessage.bind(this), false);
+  }
+
+  receiveMessage({data}) {
+    let {yodaMessage} = data;
+    if (yodaMessage === 'select-mode') {
+      this.currentPop.destroy();
+      this.enterElementHighlightMode();
+    }
   }
 
   enterElementHighlightMode() {
@@ -270,7 +296,10 @@ export class Yoda {
     })
 
     $(document).on('click', (e) => {
-      console.log(cssPath(previousEl[0]));
+      parent.postMessage({
+        yodaMessage: 'return-selector',
+        yodaMessageSelector: cssPath(previousEl[0])
+      }, '*');
       e.stopPropagation();
       e.preventDefault();
       $(document).off('click');
