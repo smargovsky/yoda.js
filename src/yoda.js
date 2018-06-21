@@ -24,7 +24,7 @@ export class Yoda {
 
   fetchGuide(userHash, permissions, locale) {
     if (this.guidesFetched) {
-      return this.guides[0]
+      return Promise.resolve(this.guides[0])
       // return Promise.resolve(this.allGuides ? this.allGuides.pop() : false);
     }
 
