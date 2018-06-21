@@ -7,7 +7,7 @@ export class Yoda {
   // fetchGuide() {
   //   return Promise.resolve(
   //     {
-  //       title: "titsle",
+  //       title: "title",
   //       steps: [
   //         {
   //           selector: '.section-header',
@@ -63,7 +63,7 @@ export class Yoda {
 
   displayPopperWithHtml(guide, index) {
     if (!guide || this.selectMode) return
-    let {selector, content} = guide.steps[index]
+    let {selector, content, title} = guide.steps[index]
     this.whenExists(selector, () => {
       let testReference = $(selector)[0]
 
@@ -71,7 +71,11 @@ export class Yoda {
       let maybeNext = guide.steps.length - 1 > index ? '<button class="next btn-sm btn-primary">Next</span>': '<button class="finish btn-sm btn-primary">Finish</span>';
 
       let popTag = $('<div class="yoda-popper">'
-        + '<div>'
+        + '<div class="header">'
+        + title
+        + '</div>'
+        + '</n>'
+        + '<div class="content">'
         + content
         + '</div>'
         + '<div class=btn-container>'
@@ -123,26 +127,26 @@ export class Yoda {
     $(`<style type='text/css'>
       .btn-primary {
         background-color: transparent;
-        border-color: #4b9eb9;
+        border-color: #94c5d6;
         color: #ffffff;
         text-shadow: none;
         background-image: -webkit-linear-gradient(top, #61b8d4 0%, #4a9cb6 100%);
-        background-image: linear-gradient(to bottom, #61b8d4 0%, #4a9cb6 100%);
+        background-image: linear-gradient(to bottom, #00b4d0 0%, #4a9cb6 150%)
         background-repeat: repeat-x;
       }
       .btn-sm {
         padding: 5px 10px;
-        font-size: 12px;
+        font-size: 14px;
         line-height: 1.5;
         border-radius: 3px;
-        margin-top: 5px;
+        margin-top: 20px;
       }
       .btn-default {
         border-color: #b8b8b8;
         color: #333333;
         text-shadow: none;
         background-image: -webkit-linear-gradient(top, #f7f7f7 0%, #e5e5e5 100%);
-        background-image: linear-gradient(to bottom, #f7f7f7 0%, #e5e5e5 100%);
+        background-image: linear-gradient(to bottom, #00b4d0 0%, #4a9cb6 150%)
         background-repeat: repeat-x;
       }
       .btn-container {
@@ -151,14 +155,14 @@ export class Yoda {
       }
       .yoda-popper {
         background: #ffffff;
-        padding: 10px;
-        max-width: 200px;
+        padding: 20px;
+        max-width: 400px;
         text-align: left;
         border-radius: 5px;
         font-family: "Lato", “HelveticaNeue”, “Helvetica”, “Arial”, sans-serif;
-        -webkit-box-shadow: 10px 10px 42px -6px rgba(0,0,0,0.75);
-        -moz-box-shadow: 10px 10px 42px -6px rgba(0,0,0,0.75);
-        box-shadow: 10px 10px 42px -6px rgba(0,0,0,0.75);
+        -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+        -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+        box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
       }
       .yoda-popper .popper__arrow {
         width: 0;
@@ -224,8 +228,24 @@ export class Yoda {
         float: right
       }
 
+      .yoda-popper .content {
+        margin: 0 0 6px 0;
+        padding: 0;
+        margin-top: 4px;
+        letter-spacing: .01rem;
+        font-weight: 300;
+        margin-bottom: 10px;
+      }
+
+      .yoda-popper .header {
+        font-size: 20px;
+        margin-bottom: 25px;
+        font-weight: 550;
+        color: #61b8d4;
+      }
+
       .yoda-popper .finish {
-        float: right
+        float: left
       }
       </style>`).appendTo("head");
   }
