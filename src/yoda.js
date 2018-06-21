@@ -227,11 +227,12 @@ export class Yoda {
       }
 
       .yoda-popper .previous {
-        float: left
+        float: left;
+        margin-right: 5px;
       }
 
       .yoda-popper .next {
-        float: right
+        float: left
       }
 
       .yoda-popper .content {
