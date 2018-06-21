@@ -1,5 +1,5 @@
 import {calcMD5} from './md5';
-import Popper from 'popper.js'
+import Popper from 'popper.js';
 
 export class Yoda {
 
@@ -24,8 +24,8 @@ export class Yoda {
 
   fetchGuide(userHash, permissions, locale) {
     if (this.guidesFetched) {
-      return Promise.resolve(this.guides[0])
-      // return Promise.resolve(this.allGuides ? this.allGuides.pop() : false)
+      return this.guides[0]
+      // return Promise.resolve(this.allGuides ? this.allGuides.pop() : false);
     }
 
     // $.ajax({
@@ -58,16 +58,8 @@ export class Yoda {
       this.guides = guides
 
       // return this.allGuides ? this.allGuides.pop() : false
-
-      return guides[0]
-    })
-
-    // return $.post(this.apiHost + '/guides',
-    //   {userHash, permissions, route: location.pathname + location.hash})
-    //   .then((guides) => {
-    //     return guides[0];
-    //   })
-    //   .catch((err) => console.error(e));
+      return this.guides[0]
+    });
   }
 
   displayPopperWithHtml(guide, index) {
@@ -235,7 +227,7 @@ export class Yoda {
       }
 
       .yoda-popper .next {
-        float: left
+        float: right
       }
 
       .yoda-popper .content {
@@ -277,6 +269,7 @@ export class Yoda {
       this.permissions = permissions;
       this.locale = locale;
 
+
       yoda.setupStyles();
       // this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
       //   this.guideIndex = 0;
@@ -288,6 +281,8 @@ export class Yoda {
   }
 
   update() {
+    if (this.guideIndex == 0) return //ignore if we're in the middle of a guide, dont mount another popover
+
     this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
       this.guideIndex = 0;
       this.guide = fetchedGuide;
@@ -297,7 +292,7 @@ export class Yoda {
 
   nextGuide() {
     this.guideIndex++;
-    this.currentPop.destroy();
+    if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
     this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
@@ -313,6 +308,8 @@ export class Yoda {
       dataType: 'json',
       contentType: 'application/json; charset=utf-8'
     })
+
+    this.guideIndex = 0 // reset for new guide
     // dont get the next guide yet - after demo we make this happen
     // .then(() => {
     //   this.update()
@@ -321,7 +318,7 @@ export class Yoda {
 
   previousGuide() {
     this.guideIndex--;
-    this.currentPop.destroy();
+    if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
     this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
@@ -339,11 +336,18 @@ export class Yoda {
   receiveMessage({data}) {
     let {yodaMessage} = data;
     if (yodaMessage === 'select-mode') {
-      if(this.currentPop) {
-        this.currentPop.destroy();
-      }
+      this.selectMode = true;
+      console.log('Enable "select-mode" postmessage received.');
+      if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
       this.enterElementHighlightMode();
-    } else if (yodaMessage === 'init') {
+    }
+    if (yodaMessage === 'clear-pops') {
+      this.selectMode = true;
+      console.log('"clear-pops" postmessage received.');
+      if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
+    }
+
+    if (yodaMessage === 'init') {
       this.sendReady();
     }
   }
