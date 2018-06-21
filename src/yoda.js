@@ -23,6 +23,9 @@ export class Yoda {
   // }
 
   fetchGuide(userHash, permissions, locale) {
+    if (this.guidesFetched) {
+      return Promise.resolve(this.allGuides ? this.allGuides.pop() : false)
+    }
 
     // $.ajax({
     //   type: 'POST',
@@ -50,7 +53,10 @@ export class Yoda {
       contentType: 'application/json; charset=utf-8'
     })
     .then((guides) => {
-      return guides[0];
+      this.guidesFetched = true
+      this.allGuides = guides
+
+      return this.allGuides ? this.allGuides.pop() : false
     })
 
     // return $.post(this.apiHost + '/guides',
@@ -267,14 +273,21 @@ export class Yoda {
       this.permissions = permissions;
       this.locale = locale;
 
-
       yoda.setupStyles();
-      this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
-        this.guideIndex = 0;
-        this.guide = fetchedGuide;
-        this.displayPopperWithHtml(this.guide, this.guideIndex);
-        // this.enterElementHighlightMode();
-      });
+      // this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
+      //   this.guideIndex = 0;
+      //   this.guide = fetchedGuide;
+      //   this.displayPopperWithHtml(this.guide, this.guideIndex);
+      //   // this.enterElementHighlightMode();
+      // });
+    });
+  }
+
+  update() {
+    this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
+      this.guideIndex = 0;
+      this.guide = fetchedGuide;
+      this.displayPopperWithHtml(this.guide, this.guideIndex);
     });
   }
 
@@ -295,6 +308,8 @@ export class Yoda {
       }),
       dataType: 'json',
       contentType: 'application/json; charset=utf-8'
+    }).then(() => {
+      this.update()
     })
   }
 
