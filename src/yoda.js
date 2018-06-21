@@ -62,7 +62,7 @@ export class Yoda {
   }
 
   displayPopperWithHtml(guide, index) {
-    if (!guide) return
+    if (!guide || this.selectMode) return
     let {selector, content} = guide.steps[index]
     this.whenExists(selector, () => {
       let testReference = $(selector)[0]
@@ -260,7 +260,7 @@ export class Yoda {
 
   nextGuide() {
     this.guideIndex++;
-    if (this.currentPop) this.currentPop.destroy();
+    if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
     this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
@@ -280,7 +280,7 @@ export class Yoda {
 
   previousGuide() {
     this.guideIndex--;
-    if (this.currentPop) this.currentPop.destroy();
+    if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
     this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
@@ -298,8 +298,15 @@ export class Yoda {
   receiveMessage({data}) {
     let {yodaMessage} = data;
     if (yodaMessage === 'select-mode') {
-      if(this.currentPop) this.currentPop.destroy();
+      this.selectMode = true;
+      console.log('Enable "select-mode" postmessage received.');
+      if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
       this.enterElementHighlightMode();
+    }
+    if (yodaMessage === 'clear-pops') {
+      this.selectMode = true;
+      console.log('"clear-pops" postmessage received.');
+      if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
     }
   }
 
