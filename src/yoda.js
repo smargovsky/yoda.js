@@ -24,7 +24,8 @@ export class Yoda {
 
   fetchGuide(userHash, permissions, locale) {
     if (this.guidesFetched) {
-      return Promise.resolve(this.allGuides ? this.allGuides.pop() : false)
+      return Promise.resolve(this.guides[0])
+      // return Promise.resolve(this.allGuides ? this.allGuides.pop() : false)
     }
 
     // $.ajax({
@@ -54,9 +55,11 @@ export class Yoda {
     })
     .then((guides) => {
       this.guidesFetched = true
-      this.allGuides = guides
+      this.guides = guides
 
-      return this.allGuides ? this.allGuides.pop() : false
+      // return this.allGuides ? this.allGuides.pop() : false
+
+      return guides[0]
     })
 
     // return $.post(this.apiHost + '/guides',
@@ -308,9 +311,11 @@ export class Yoda {
       }),
       dataType: 'json',
       contentType: 'application/json; charset=utf-8'
-    }).then(() => {
-      this.update()
     })
+    // dont get the next guide yet - after demo we make this happen
+    // .then(() => {
+    //   this.update()
+    // })
   }
 
   previousGuide() {
