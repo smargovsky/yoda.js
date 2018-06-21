@@ -281,7 +281,7 @@ export class Yoda {
   }
 
   update() {
-    if (this.guideIndex == 0) return //ignore if we're in the middle of a guide, dont mount another popover
+    if (this.guideIndex > 0) return //ignore if we're in the middle of a guide, dont mount another popover
 
     this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
       this.guideIndex = 0;
