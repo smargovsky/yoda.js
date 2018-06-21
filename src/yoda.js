@@ -265,7 +265,7 @@ export class Yoda {
 
       this.userHash = calcMD5(userId);
       this.permissions = permissions;
-      this.locale = 'jp';
+      this.locale = locale;
 
 
       yoda.setupStyles();
