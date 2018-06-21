@@ -265,7 +265,7 @@ export class Yoda {
 
       this.userHash = calcMD5(userId);
       this.permissions = permissions;
-      this.locale = locale;
+      this.locale = 'jp';
 
 
       yoda.setupStyles();
@@ -280,12 +280,12 @@ export class Yoda {
 
   nextGuide() {
     this.guideIndex++;
-    if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
+    this.currentPop.destroy();
     this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
   finishGuide() {
-    if (this.currentPop) this.currentPop.destroy()
+    this.currentPop.destroy()
     $.ajax({
       type: 'POST',
       url: this.apiHost + '/guides/' + this.guide.id,
@@ -300,7 +300,7 @@ export class Yoda {
 
   previousGuide() {
     this.guideIndex--;
-    if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
+    this.currentPop.destroy();
     this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
@@ -318,15 +318,12 @@ export class Yoda {
   receiveMessage({data}) {
     let {yodaMessage} = data;
     if (yodaMessage === 'select-mode') {
-      this.selectMode = true;
-      console.log('Enable "select-mode" postmessage received.');
-      if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
+      if(this.currentPop) {
+        this.currentPop.destroy();
+      }
       this.enterElementHighlightMode();
-    }
-    if (yodaMessage === 'clear-pops') {
-      this.selectMode = true;
-      console.log('"clear-pops" postmessage received.');
-      if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
+    } else if (yodaMessage === 'init') {
+      this.sendReady();
     }
   }
 
