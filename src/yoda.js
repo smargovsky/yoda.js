@@ -41,8 +41,8 @@ export class Yoda {
       type: 'POST',
       url: this.apiHost + '/guides',
       data: JSON.stringify({
-        'user_id': userHash, 
-        permissions, 
+        'user_id': userHash,
+        permissions,
         route: location.pathname + location.hash,
         locale: locale
       }),
@@ -53,7 +53,7 @@ export class Yoda {
       return guides[0];
     })
 
-    // return $.post(this.apiHost + '/guides', 
+    // return $.post(this.apiHost + '/guides',
     //   {userHash, permissions, route: location.pathname + location.hash})
     //   .then((guides) => {
     //     return guides[0];
@@ -62,6 +62,7 @@ export class Yoda {
   }
 
   displayPopperWithHtml(guide, index) {
+    if (!guide) return
     let {selector, content} = guide.steps[index]
     this.whenExists(selector, () => {
       let testReference = $(selector)[0]
@@ -69,7 +70,7 @@ export class Yoda {
       let maybePrev = index > 0 ? '<button class="previous btn-sm btn-default">Prev</span>' : '';
       let maybeNext = guide.steps.length - 1 > index ? '<button class="next btn-sm btn-primary">Next</span>': '<button class="finish btn-sm btn-primary">Finish</span>';
 
-      let popTag = $('<div class="yoda-popper">' 
+      let popTag = $('<div class="yoda-popper">'
         + '<div>'
         + content
         + '</div>'
@@ -109,7 +110,7 @@ export class Yoda {
         cb()
         clearInterval(checkExistance);
       } else {
-        timesChecked++; 
+        timesChecked++;
         if (timesChecked > 200) {
           console.warn('Couldnt find element to attach yoda after 20 seconds, giving up')
           clearInterval(checkExistance);
@@ -119,7 +120,7 @@ export class Yoda {
   }
 
   setupStyles() {
-    $(`<style type='text/css'> 
+    $(`<style type='text/css'>
       .btn-primary {
         background-color: transparent;
         border-color: #4b9eb9;
@@ -146,7 +147,7 @@ export class Yoda {
       }
       .btn-container {
         width: 100%;
-        
+
       }
       .yoda-popper {
         background: #ffffff;
@@ -259,12 +260,12 @@ export class Yoda {
 
   nextGuide() {
     this.guideIndex++;
-    this.currentPop.destroy();
+    if (this.currentPop) this.currentPop.destroy();
     this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
   finishGuide() {
-    this.currentPop.destroy()
+    if (this.currentPop) this.currentPop.destroy()
     $.ajax({
       type: 'POST',
       url: this.apiHost + '/guides/' + this.guide.id,
@@ -279,7 +280,7 @@ export class Yoda {
 
   previousGuide() {
     this.guideIndex--;
-    this.currentPop.destroy();
+    if (this.currentPop) this.currentPop.destroy();
     this.displayPopperWithHtml(this.guide, this.guideIndex);
   }
 
@@ -297,9 +298,7 @@ export class Yoda {
   receiveMessage({data}) {
     let {yodaMessage} = data;
     if (yodaMessage === 'select-mode') {
-      if(this.currentPop) {
-        this.currentPop.destroy();
-      }
+      if(this.currentPop) this.currentPop.destroy();
       this.enterElementHighlightMode();
     }
   }
@@ -307,7 +306,7 @@ export class Yoda {
   enterElementHighlightMode() {
 
     let cssPath = function(el) {
-      if (!(el instanceof Element)) 
+      if (!(el instanceof Element))
           return;
       let path = [];
       while (el.nodeType === Node.ELEMENT_NODE) {
