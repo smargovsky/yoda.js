@@ -1,52 +1,21 @@
 import {calcMD5} from './md5';
 import Popper from 'popper.js';
 
-export class Yoda {
-
-
-  // fetchGuide() {
-  //   return Promise.resolve(
-  //     {
-  //       title: "title",
-  //       steps: [
-  //         {
-  //           selector: '.section-header',
-  //           content: '<div> WIZARDS</div>'
-  //         },
-  //         {
-  //           selector: '.breadcrumbs',
-  //           content: '<div> WIZARDS EVERYWHERE </div>'
-  //         }
-  //       ]
-  //     }
-  //   );
-  // }
-
-  fetchGuide(userHash, permissions, locale) {
+class Yoda {
+  fetchGuide(userHash, locale) {
     if (this.guidesFetched) {
       return Promise.resolve(this.guides[0])
-      // return Promise.resolve(this.allGuides ? this.allGuides.pop() : false);
     }
 
-    // $.ajax({
-    //   type: 'POST',
-    //   url: this.apiHost + '/guides/' + this.guide.id,
-    //   data: JSON.stringify({
-    //     user_id: this.userHash,
-    //     completed: true
-    //   }),
-    //   dataType: 'json',
-    //   contentType: 'application/json; charset=utf-8'
-    // })
     if (!locale) {
       locale = 'en';
     }
+
     return $.ajax({
       type: 'POST',
       url: this.apiHost + '/guides',
       data: JSON.stringify({
         'user_id': userHash,
-        permissions,
         route: location.pathname + location.hash,
         locale: locale
       }),
@@ -252,23 +221,20 @@ export class Yoda {
       </style>`).appendTo("head");
   }
 
-  init(getUserAndPermissions, apiHost) {
-
+  init(getDataFromApp, apiHost) {
     this.apiHost = apiHost;
 
     this.sendReady();
 
-    getUserAndPermissions().then( (userAndPermissions) => {
-      let {userId, permissions, locale} = userAndPermissions
+    getDataFromApp().then( (dataFromApp) => {
+      let {userId, locale} = dataFromApp;
 
-      if (!userId || !permissions) {
-        throw Error('getUserAndPermissions must return a promise to an object of the form {userId: ___, permissions: ___}')
+      if (!userId || !locale) {
+        throw Error('getDataFromApp must return a promise to an object of the form {userId: ___, locale: ___}')
       }
 
       this.userHash = calcMD5(userId);
-      this.permissions = permissions;
       this.locale = locale;
-
 
       yoda.setupStyles();
       // this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
@@ -280,12 +246,14 @@ export class Yoda {
     });
   }
 
-  update() {
+  update(filterGuides) {
     if (this.guideIndex > 0) return //ignore if we're in the middle of a guide, dont mount another popover
 
-    this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
+    this.fetchGuide(this.userHash, this.locale).then( (fetchedGuides) => {
       this.guideIndex = 0;
-      this.guide = fetchedGuide;
+      return filterGuides(fetchedGuides);
+    }).then( (filteredGuides) => {
+      this.guide = filteredGuides;
       this.displayPopperWithHtml(this.guide, this.guideIndex);
     });
   }
@@ -353,7 +321,6 @@ export class Yoda {
   }
 
   enterElementHighlightMode() {
-
     let cssPath = function(el) {
       if (!(el instanceof Element))
           return;
@@ -406,14 +373,4 @@ export class Yoda {
 
 }
 
-
-
-
-export let yoda = new Yoda();
-// export let yoda = new Yoda()
-// window.yoda = new Yoda();
-// yoda.init(() => {return Promise.resolve({userHash: 'stub', permissions: []})}, 'https://docs.test/wp-json/api/v1' )
-// yoda.setupStyles();
-// yoda.whenExists('.section-header', () => {
-//   yoda.displayPopperWithHtml('.section-header', '<div>Food</div>')
-// });
+export default new Yoda();

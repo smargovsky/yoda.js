@@ -26,7 +26,8 @@ node_modules
 bower_components
 coverage
 tmp
-dist
+yarn.lock
+# dist
 
 # Users Environment Variables
 .lock-wscript
