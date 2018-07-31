@@ -182,7 +182,7 @@ function buildManifestForJenkins() {
         buildDate: new Date().toISOString(),
         buildNumber: process.env.BUILD_NUMBER,
     };
-    fs.writeFile(`${process.cwd()}/dist/manifest.json`, 'contents', JSON.stringify(buildManifestForJenkins));
+    fs.writeFile(`${process.cwd()}/dist/manifest.json`, JSON.stringify(buildManifestForJenkins));
 }
 
 // Remove the built files
