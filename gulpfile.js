@@ -3,6 +3,7 @@ const loadPlugins = require('gulp-load-plugins');
 const del = require('del');
 const glob = require('glob');
 const path = require('path');
+const fs = require('fs');
 const isparta = require('isparta');
 const webpack = require('webpack');
 const webpackStream = require('webpack-stream');
@@ -165,6 +166,25 @@ function testBrowser() {
     .pipe(gulp.dest('./tmp'));
 }
 
+function buildManifestForJenkins() {
+    if ( !process.env.WEB_APP_NAME ) {
+        return true;
+    }
+    var buildManifestForJenkins = {
+        indexFiles: [
+            {
+                url: `/${process.env.WEB_APP_NAME}/yoda.js`,
+                file: './dist/yoda.min.js'
+            }
+        ],
+        name: 'admin',
+        version: process.env.BUILD_NUMBER,
+        buildDate: new Date().toISOString(),
+        buildNumber: process.env.BUILD_NUMBER,
+    };
+    fs.writeFile(`${process.cwd()}/dist/manifest.json`, 'contents', JSON.stringify(buildManifestForJenkins));
+}
+
 // Remove the built files
 gulp.task('clean', cleanDist);
 
@@ -185,6 +205,10 @@ gulp.task('lint', ['lint-src', 'lint-test', 'lint-gulpfile']);
 
 // Build two versions of the library
 gulp.task('build', ['clean'], build);
+
+gulp.task('buildManifestForJenkins', ['build'], buildManifestForJenkins)
+
+gulp.task('jenkins', ['buildManifestForJenkins']);
 
 // Lint and run our tests
 gulp.task('test', ['lint'], test);
