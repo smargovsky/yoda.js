@@ -173,7 +173,7 @@ function buildManifestForJenkins() {
     var buildManifestForJenkins = {
         indexFiles: [
             {
-                url: `/${process.env.WEB_APP_NAME}/yoda.js`,
+                url: `/${process.env.WEB_APP_NAME}/yoda.min.js`,
                 file: './dist/yoda.min.js'
             }
         ],
