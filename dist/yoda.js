@@ -56,10 +56,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	var _md = __webpack_require__(1);
@@ -72,12 +68,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var Yoda = function () {
-	  function Yoda() {
-	    _classCallCheck(this, Yoda);
+	var YodaGuides = function () {
+	  function YodaGuides() {
+	    _classCallCheck(this, YodaGuides);
 	  }
 	
-	  _createClass(Yoda, [{
+	  _createClass(YodaGuides, [{
 	    key: 'fetchGuide',
 	    value: function fetchGuide(userHash, locale) {
 	      var _this = this;
@@ -341,10 +337,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }]);
 	
-	  return Yoda;
+	  return YodaGuides;
 	}();
 	
-	exports.default = new Yoda();
+	window.Yoda = new YodaGuides();
 
 /***/ },
 /* 1 */

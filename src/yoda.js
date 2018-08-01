@@ -1,7 +1,7 @@
 import {calcMD5} from './md5';
 import Popper from 'popper.js';
 
-class Yoda {
+class YodaGuides {
   fetchGuide(userHash, locale) {
     if (this.guidesFetched) {
       return Promise.resolve(this.guides[0])
@@ -372,5 +372,4 @@ class Yoda {
   }
 
 }
-
-export default new Yoda();
+window.Yoda = new YodaGuides();
