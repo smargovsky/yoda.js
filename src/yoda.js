@@ -96,128 +96,190 @@ class YodaGuides {
   setupStyles() {
     $(`<style type='text/css'>
       .btn-primary {
-        background-color: transparent;
-        border-color: #94c5d6;
-        color: #ffffff;
-        text-shadow: none;
-        background-image: -webkit-linear-gradient(top, #61b8d4 0%, #4a9cb6 100%);
-        background-image: linear-gradient(to bottom, #00b4d0 0%, #4a9cb6 150%)
-        background-repeat: repeat-x;
-      }
-      .btn-sm {
-        padding: 5px 10px;
-        font-size: 14px;
-        line-height: 1.5;
-        border-radius: 3px;
-        margin-top: 20px;
-      }
-      .btn-default {
-        border-color: #b8b8b8;
-        color: #333333;
-        text-shadow: none;
-        background-image: -webkit-linear-gradient(top, #f7f7f7 0%, #e5e5e5 100%);
-        background-image: linear-gradient(to bottom, #00b4d0 0%, #4a9cb6 150%)
-        background-repeat: repeat-x;
-      }
-      .btn-container {
-        width: 100%;
+  background-color: transparent;
+  border-color: #94c5d6;
+  color: #ffffff;
+  text-shadow: none;
+  background-image: -webkit-linear-gradient(top, #61b8d4 0%, #4a9cb6 100%);
+  background-image: linear-gradient(to bottom, #00b4d0 0%, #4a9cb6 150%)
+  background-repeat: repeat-x;
+}
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  border-radius: 3px;
+  margin-top: 20px;
+}
+.spacer {
+  padding: 10px
+}
+.btn-default {
+  border-color: #b8b8b8;
+  color: #333333;
+  text-shadow: none;
+  background-image: -webkit-linear-gradient(top, #f7f7f7 0%, #e5e5e5 100%);
+  background-image: linear-gradient(to bottom, #00b4d0 0%, #4a9cb6 150%)
+  background-repeat: repeat-x;
+}
+.btn-container {
+  width: 100%;
 
-      }
-      .yoda-popper {
-        background: #ffffff;
-        padding: 20px;
-        max-width: 400px;
-        text-align: left;
-        border-radius: 5px;
-        font-family: "Lato", “HelveticaNeue”, “Helvetica”, “Arial”, sans-serif;
-        -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
-        -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
-        box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
-      }
-      .yoda-popper .popper__arrow {
-        width: 0;
-        height: 0;
-        border-style: solid;
-        position: absolute;
-        margin: 5px;
-      }
+}
+.yoda-annoucement {
+  background: #ffffff;
+  padding: 20px;
+  max-width: 400px;
+  min-width: 400px;
+  text-align: left;
+  border-radius: 5px;
+  font-family: "Lato", “HelveticaNeue”, “Helvetica”, “Arial”, sans-serif;
+  -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+  -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+  box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+}
+.yoda-banner {
+  background: #ffffff;
+  padding: 20px;
+  text-align: left;
+  font-family: "Lato", “HelveticaNeue”, “Helvetica”, “Arial”, sans-serif;
+  -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+  -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+  box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+}
+.yoda-toast {
+  position: absolute;
+  background: #ffffff;
+  padding: 20px;
+  max-width: 400px;
+  text-align: left;
+  border-radius: 5px 5px 0px 0px;
+  font-family: "Lato", “HelveticaNeue”, “Helvetica”, “Arial”, sans-serif;
+  -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+  -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+  box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
+  bottom:0px;
+  right:5px;
+  z-index: 100;
+}
+.banner-bottom {
+  position: absolute;
+  bottom:0;
+  max-width: none;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 400px;
+  border-radius: 5px 5px 0px 0px;
+}
 
-      .yoda-popper[x-placement^=top] {
-        margin-bottom: 5px;
-      }
-      .yoda-popper[x-placement^=top] .popper__arrow {
-        border-width: 5px 5px 0 5px;
-        border-color: #ffffff transparent transparent transparent;
-        bottom: -5px;
-        left: calc(50% - 5px);
-        margin-top: 0;
-        margin-bottom: 0;
-      }
+.banner-top {
+  position: absolute;
+  top:0;
+  max-width: none;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 400px;
+  border-radius: 0px 0px 5px 5px;
+  
+}
+.yoda-popper .close {
+  border: none;
+  text-decoration: none;
+  font-size: 1rem;
+  float: right;
+  color: grey;
+}
+.yoda-popper .close:hover {
+  color: black;
+  
+}
+.yoda-popper .popper__arrow {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  position: absolute;
+  margin: 5px;
+}
 
-      .yoda-popper[x-placement^=bottom] {
-        margin-top: 5px;
-      }
-      .yoda-popper[x-placement^=bottom] .popper__arrow {
-        border-width: 0 5px 5px 5px;
-        border-color: transparent transparent #ffffff transparent;
-        top: -5px;
-        left: calc(50% - 5px);
-        margin-top: 0;
-        margin-bottom: 0;
-      }
+.yoda-popper[x-placement^=top] {
+  margin-bottom: 5px;
+}
+.yoda-popper[x-placement^=top] .popper__arrow {
+  border-width: 5px 5px 0 5px;
+  border-color: #ffffff transparent transparent transparent;
+  bottom: -5px;
+  left: calc(50% - 5px);
+  margin-top: 0;
+  margin-bottom: 0;
+}
 
-      .yoda-popper[x-placement^=right] {
-        margin-left: 5px;
-      }
-      .yoda-popper[x-placement^=right] .popper__arrow {
-        border-width: 5px 5px 5px 0;
-        border-color: transparent #ffffff transparent transparent;
-        left: -5px;
-        top: calc(50% - 5px);
-        margin-left: 0;
-        margin-right: 0;
-      }
+.yoda-popper[x-placement^=bottom] {
+  margin-top: 5px;
+}
+.yoda-popper[x-placement^=bottom] .popper__arrow {
+  border-width: 0 5px 5px 5px;
+  border-color: transparent transparent #ffffff transparent;
+  top: -5px;
+  left: calc(50% - 5px);
+  margin-top: 0;
+  margin-bottom: 0;
+}
 
-      .yoda-popper[x-placement^=left] {
-        margin-right: 5px;
-      }
-      .yoda-popper[x-placement^=left] .popper__arrow {
-        border-width: 5px 0 5px 5px;
-        border-color: transparent transparent transparent #ffffff;
-        right: -5px;
-        top: calc(50% - 5px);
-        margin-left: 0;
-        margin-right: 0;
-      }
+.yoda-popper[x-placement^=right] {
+  margin-left: 5px;
+}
+.yoda-popper[x-placement^=right] .popper__arrow {
+  border-width: 5px 5px 5px 0;
+  border-color: transparent #ffffff transparent transparent;
+  left: -5px;
+  top: calc(50% - 5px);
+  margin-left: 0;
+  margin-right: 0;
+}
 
-      .yoda-popper .previous {
-        float: left;
-        margin-right: 5px;
-      }
+.yoda-popper[x-placement^=left] {
+  margin-right: 5px;
+}
+.yoda-popper[x-placement^=left] .popper__arrow {
+  border-width: 5px 0 5px 5px;
+  border-color: transparent transparent transparent #ffffff;
+  right: -5px;
+  top: calc(50% - 5px);
+  margin-left: 0;
+  margin-right: 0;
+}
 
-      .yoda-popper .next {
-        float: right
-      }
+.yoda-popper .previous {
+  float: left;
+  margin-right: 5px;
+}
 
-      .yoda-popper .content {
-        margin: 0 0 6px 0;
-        padding: 0;
-        margin-top: 4px;
-        letter-spacing: .01rem;
-        font-weight: 300;
-        margin-bottom: 10px;
-      }
+.yoda-popper .next {
+  float: right
+}
 
-      .yoda-popper .header {
-        font-size: 20px;
-        margin-bottom: 25px;
-        font-weight: 550;
-        color: #61b8d4;
-      }
+.yoda-popper .content {
+  margin: 0 0 6px 0;
+  padding: 0;
+  margin-top: 4px;
+  font-size: 1rem;
+  letter-spacing: .01rem;
+  font-weight: 300;
+  margin-bottom: 10px;
+}
 
-      .yoda-popper .finish {
-        float: left
-      }
+.yoda-popper .header {
+  font-size: 20px;
+  margin-bottom: 25px;
+  font-weight: 550;
+  color: #61b8d4;
+}
+
+.yoda-popper .finish {
+  float: left
+}
       </style>`).appendTo("head");
   }
 
