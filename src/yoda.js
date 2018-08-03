@@ -2,7 +2,7 @@ import {calcMD5} from './md5';
 import Popper from 'popper.js';
 
 class YodaGuides {
-  fetchGuide(userHash, locale) {
+  fetchGuide(userHash, locale, page) {
     if (this.guidesFetched) {
       return Promise.resolve(this.guides[0])
     }
@@ -16,18 +16,17 @@ class YodaGuides {
       url: this.apiHost + '/guides',
       data: JSON.stringify({
         'user_id': userHash,
-        route: location.pathname + location.hash,
+        route: page,
         locale: locale
       }),
       dataType: 'json',
       contentType: 'application/json; charset=utf-8'
     })
     .then((guides) => {
-      this.guidesFetched = true
       this.guides = guides
 
       // return this.allGuides ? this.allGuides.pop() : false
-      return this.guides[0]
+      return this.guides
     });
   }
 
@@ -307,7 +306,7 @@ class YodaGuides {
 
     this.sendReady();
 
-    getDataFromApp().then( (dataFromApp) => {
+    return getDataFromApp().then((dataFromApp) => {
       let {userId, locale} = dataFromApp;
 
       if (!userId || !locale) {
@@ -317,24 +316,20 @@ class YodaGuides {
       this.userHash = calcMD5(userId);
       this.locale = locale;
 
-      yoda.setupStyles();
-      // this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
-      //   this.guideIndex = 0;
-      //   this.guide = fetchedGuide;
-      //   this.displayPopperWithHtml(this.guide, this.guideIndex);
-      //   // this.enterElementHighlightMode();
-      // });
+      this.setupStyles();
+
     });
   }
 
-  update(filterGuides) {
+  update(filterGuides, page) {
     if (this.guideIndex > 0) return //ignore if we're in the middle of a guide, dont mount another popover
 
-    this.fetchGuide(this.userHash, this.locale).then( (fetchedGuides) => {
+    this.fetchGuide(this.userHash, this.locale, page).then( (fetchedGuides) => {
       this.guideIndex = 0;
       return filterGuides(fetchedGuides);
     }).then( (filteredGuides) => {
-      this.guide = filteredGuides;
+      this.guide = filteredGuides[0];
+      console.log(' ********* HERE IS A GUIDE!', filteredGuides);
       this.displayPopperWithHtml(this.guide, this.guideIndex);
     });
   }

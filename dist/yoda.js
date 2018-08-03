@@ -78,9 +78,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function fetchGuide(userHash, locale, page) {
 	      var _this = this;
 	
+	      if (this.guidesFetched) {
+	        return Promise.resolve(this.guides[0]);
+	      }
+	
 	      if (!locale) {
 	        locale = 'en';
 	      }
+	
 	      return $.ajax({
 	        type: 'POST',
 	        url: this.apiHost + '/guides',
@@ -92,8 +97,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        dataType: 'json',
 	        contentType: 'application/json; charset=utf-8'
 	      }).then(function (guides) {
+	        _this.guidesFetched = true;
 	        _this.guides = guides;
-	        return _this.guides;
+	
+	        // return this.allGuides ? this.allGuides.pop() : false
+	        return _this.guides[0];
 	      });
 	    }
 	  }, {
@@ -186,7 +194,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      this.sendReady();
 	
-	      return getDataFromApp().then(function (dataFromApp) {
+	      getDataFromApp().then(function (dataFromApp) {
 	        var userId = dataFromApp.userId,
 	            locale = dataFromApp.locale;
 	
@@ -197,7 +205,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        _this3.userHash = (0, _md.calcMD5)(userId);
 	        _this3.locale = locale;
-	        _this3.setupStyles();
+	
+	        yoda.setupStyles();
+	        // this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
+	        //   this.guideIndex = 0;
+	        //   this.guide = fetchedGuide;
+	        //   this.displayPopperWithHtml(this.guide, this.guideIndex);
+	        //   // this.enterElementHighlightMode();
+	        // });
 	      });
 	    }
 	  }, {
@@ -211,8 +226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _this4.guideIndex = 0;
 	        return filterGuides(fetchedGuides);
 	      }).then(function (filteredGuides) {
-	        _this4.guide = filteredGuides[0];
-	        console.log(' ********* HERE IS A GUIDE!', filteredGuides);
+	        _this4.guide = filteredGuides;
 	        _this4.displayPopperWithHtml(_this4.guide, _this4.guideIndex);
 	      });
 	    }
