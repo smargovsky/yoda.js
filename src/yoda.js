@@ -2,37 +2,51 @@ import {calcMD5} from './md5';
 import Popper from 'popper.js';
 
 class YodaGuides {
-  fetchGuide(userHash, locale, page) {
+  fetchGuide(userHash, locale) {
+    if (this.guidesFetched) {
+      return Promise.resolve(this.guides[0])
+    }
+
     if (!locale) {
       locale = 'en';
     }
+
     return $.ajax({
       type: 'POST',
       url: this.apiHost + '/guides',
       data: JSON.stringify({
         'user_id': userHash,
-        route: page,
+        route: location.pathname + location.hash,
         locale: locale
       }),
       dataType: 'json',
       contentType: 'application/json; charset=utf-8'
     })
     .then((guides) => {
+      this.guidesFetched = true
       this.guides = guides
-      return this.guides
+
+      // return this.allGuides ? this.allGuides.pop() : false
+      return this.guides[0]
     });
   }
 
   displayPopperWithHtml(guide, index) {
     if (!guide || this.selectMode) return
     let {selector, content, title} = guide.steps[index]
+    
+    //if displyType doesn't require a selector - don't give it one
+    if (guide.displayType === "TOAST" || guide.displayType === "DEFAULT") {
+      selector = false;
+    }
+
     this.whenExists(selector, () => {
       let testReference = $(selector)[0]
 
       let maybePrev = index > 0 ? '<button class="previous btn-sm btn-default">Prev</span>' : '';
       let maybeNext = guide.steps.length - 1 > index ? '<button class="next btn-sm btn-primary">Next</span>': '<button class="finish btn-sm btn-primary">Finish</span>';
-
-      let popTag = $('<div class="yoda-popper">'
+      let classes = getClasses(guide)
+      let popTag = $(`<div class="${classes}">`
         + '<div class="header">'
         + title
         + '</div>'
@@ -72,7 +86,7 @@ class YodaGuides {
   whenExists(selector, cb, waitTime) {
     let timesChecked = 0;
     let checkExistance = setInterval(function() {
-      if ($(selector).length) {
+      if ($(selector).length || selector === false) {
         cb()
         clearInterval(checkExistance);
       } else {
@@ -83,6 +97,19 @@ class YodaGuides {
         }
       }
     }, 100);
+  }
+  getClasses(guide) {
+    var classes = 'yoda-popper';
+
+    if (guide.displayType === 'DEFAULT') {
+      classes = classes + ' yoda-announcement'
+    } else if (guide.displayType === 'TOAST') {
+      classes = classes + ' yoda-toast'
+    } else if (guide.displayType === 'BANNER-BOTTOM') {
+      classes = classes + ' yoda-banner banner-bottom'
+    } else if (guide.displayType === 'BANNER-TOP') {
+      classes = classes + ' yoda-banner banner-top'
+    }
   }
 
   setupStyles() {
@@ -280,7 +307,7 @@ class YodaGuides {
 
     this.sendReady();
 
-    return getDataFromApp().then( (dataFromApp) => {
+    getDataFromApp().then( (dataFromApp) => {
       let {userId, locale} = dataFromApp;
 
       if (!userId || !locale) {
@@ -289,19 +316,25 @@ class YodaGuides {
 
       this.userHash = calcMD5(userId);
       this.locale = locale;
-      this.setupStyles();
+
+      yoda.setupStyles();
+      // this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
+      //   this.guideIndex = 0;
+      //   this.guide = fetchedGuide;
+      //   this.displayPopperWithHtml(this.guide, this.guideIndex);
+      //   // this.enterElementHighlightMode();
+      // });
     });
   }
 
-  update(filterGuides, page) {
+  update(filterGuides) {
     if (this.guideIndex > 0) return //ignore if we're in the middle of a guide, dont mount another popover
 
-    this.fetchGuide(this.userHash, this.locale, page).then( (fetchedGuides) => {
+    this.fetchGuide(this.userHash, this.locale).then( (fetchedGuides) => {
       this.guideIndex = 0;
       return filterGuides(fetchedGuides);
     }).then( (filteredGuides) => {
-      this.guide = filteredGuides[0];
-      console.log(' ********* HERE IS A GUIDE!', filteredGuides);
+      this.guide = filteredGuides;
       this.displayPopperWithHtml(this.guide, this.guideIndex);
     });
   }
