@@ -68,295 +68,295 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
+	var TYPES = {
+	    TOAST: 'toast',
+	    DEFAULT: 'pop-up',
+	    TOP: 'top',
+	    BOTTOM: 'bottom'
+	};
+	
 	var YodaGuides = function () {
-	  function YodaGuides() {
-	    _classCallCheck(this, YodaGuides);
-	  }
-	
-	  _createClass(YodaGuides, [{
-	    key: 'fetchGuide',
-	    value: function fetchGuide(userHash, locale, page) {
-	      var _this = this;
-	
-	      if (this.guidesFetched) {
-	        return Promise.resolve(this.guides[0]);
-	      }
-	
-	      if (!locale) {
-	        locale = 'en';
-	      }
-	
-	      return $.ajax({
-	        type: 'POST',
-	        url: this.apiHost + '/guides',
-	        data: JSON.stringify({
-	          'user_id': userHash,
-	          route: page,
-	          locale: locale
-	        }),
-	        dataType: 'json',
-	        contentType: 'application/json; charset=utf-8'
-	      }).then(function (guides) {
-	        _this.guidesFetched = true;
-	        _this.guides = guides;
-	
-	        // return this.allGuides ? this.allGuides.pop() : false
-	        return _this.guides[0];
-	      });
+	    function YodaGuides() {
+	        _classCallCheck(this, YodaGuides);
 	    }
-	  }, {
-	    key: 'displayPopperWithHtml',
-	    value: function displayPopperWithHtml(guide, index) {
-	      var _this2 = this;
 	
-	      if (!guide || this.selectMode) return;
-	      var _guide$steps$index = guide.steps[index],
-	          selector = _guide$steps$index.selector,
-	          content = _guide$steps$index.content,
-	          title = _guide$steps$index.title;
-
-						//if displyType doesn't require a selector - don't give it one
-						if (guide.displayType === "toast") {
-							selector = false;
-						}
-	      this.whenExists(selector, function () {
-	        var testReference = $(selector)[0];
+	    _createClass(YodaGuides, [{
+	        key: 'init',
+	        value: function init(getDataFromApp, apiHost) {
+	            var _this = this;
 	
-	        var maybePrev = index > 0 ? '<button class="previous btn-sm btn-default">Prev</span>' : '';
-	        var maybeNext = guide.steps.length - 1 > index ? '<button class="next btn-sm btn-primary">Next</span>' : '<button class="finish btn-sm btn-primary">Finish</span>';
-	        var classes = this.getClasses(guide);
-	        var popTag = $('<div class="' + classes + '">' + '<div class="header">' + title + '</div>' + '</n>' + '<div class="content">' + content + '</div>' + '<div class=btn-container>' + maybePrev + maybeNext + '</div>' + '<div class="popper__arrow" x-arrow=""></div></div>');
+	            this.apiHost = apiHost;
 	
-	        $('body').append(popTag);
+	            this.sendReady();
 	
-	        popTag.find('.next').on('click', _this2.nextGuide.bind(_this2));
-	        popTag.find('.finish').on('click', _this2.finishGuide.bind(_this2));
-	        popTag.find('.previous').on('click', _this2.previousGuide.bind(_this2));
+	            return getDataFromApp().then(function (dataFromApp) {
+	                var userId = dataFromApp.userId,
+	                    locale = dataFromApp.locale;
 	
-	        _this2.currentPop = new _popper2.default(testReference, popTag, {
-	          placement: 'left',
-	          modifiers: {
-	            arrow: {
-	              enabled: true
+	
+	                if (!userId || !locale) {
+	                    throw Error('getDataFromApp must return a promise to an object of the form {userId: ___, locale: ___}');
+	                }
+	
+	                _this.userHash = (0, _md.calcMD5)(userId);
+	                _this.locale = locale;
+	
+	                _this.setupStyles();
+	                return true;
+	            });
+	        }
+	    }, {
+	        key: 'fetchGuide',
+	        value: function fetchGuide(userHash, locale, page) {
+	            var _this2 = this;
+	
+	            if (!locale) {
+	                locale = 'en';
 	            }
-	          },
-	          removeOnDestroy: true,
-	          offset: {
-	            enabled: true,
-	            offset: '0,10'
-	          }
-	        });
-	      });
-	    }
-	  }, {
-	    key: 'whenExists',
-	    value: function whenExists(selector, cb, waitTime) {
-	      var timesChecked = 0;
-	      var checkExistance = setInterval(function () {
-	        if ($(selector).length || selector === false) {
-	          cb();
-	          clearInterval(checkExistance);
-	        } else {
-	          timesChecked++;
-	          if (timesChecked > 200) {
-	            console.warn('Couldnt find element to attach yoda after 20 seconds, giving up');
-	            clearInterval(checkExistance);
-	          }
+	
+	            return $.ajax({
+	                type: 'POST',
+	                url: this.apiHost + '/guides',
+	                data: JSON.stringify({
+	                    'user_id': userHash,
+	                    route: page,
+	                    locale: locale
+	                }),
+	                dataType: 'json',
+	                contentType: 'application/json; charset=utf-8'
+	            }).then(function (guides) {
+	                _this2.guides = guides;
+	
+	                return _this2.guides;
+	            });
 	        }
-	      }, 100);
-	    }
-	  }, {
-			key: 'getClasses',
-			value: function getClasses(guide) {
-				var classes = 'yoda-popper'
-
-				if (guide.displayType === 'DEFAULT') {
-					classes = classes + ' yoda-announcement'
-				} else if (guide.displayType === 'TOAST') {
-					classes = classes + ' yoda-toast'
-				}else if (guide.displayType === 'BANNER-BOTTOM') {
-					classes = classes + ' yoda-banner banner-bottom'
-				} else if (guide.displayType === 'BANNER-TOP') {
-					classes = classes + ' yoda-banner banner-top'
-				} 
-			}
-		}, {
-	    key: 'setupStyles',
-	    value: function setupStyles() {
-	      $('<style type=\'text/css\'>\n      .btn-primary {\n  background-color: transparent;\n  border-color: #94c5d6;\n  color: #ffffff;\n  text-shadow: none;\n  background-image: -webkit-linear-gradient(top, #61b8d4 0%, #4a9cb6 100%);\n  background-image: linear-gradient(to bottom, #00b4d0 0%, #4a9cb6 150%)\n  background-repeat: repeat-x;\n}\n.btn-sm {\n  padding: 5px 10px;\n  font-size: 14px;\n  line-height: 1.5;\n  border-radius: 3px;\n  margin-top: 20px;\n}\n.spacer {\n  padding: 10px\n}\n.btn-default {\n  border-color: #b8b8b8;\n  color: #333333;\n  text-shadow: none;\n  background-image: -webkit-linear-gradient(top, #f7f7f7 0%, #e5e5e5 100%);\n  background-image: linear-gradient(to bottom, #00b4d0 0%, #4a9cb6 150%)\n  background-repeat: repeat-x;\n}\n.btn-container {\n  width: 100%;\n\n}\n.yoda-annoucement {\n  background: #ffffff;\n  padding: 20px;\n  max-width: 400px;\n  min-width: 400px;\n  text-align: left;\n  border-radius: 5px;\n  font-family: "Lato", \u201CHelveticaNeue\u201D, \u201CHelvetica\u201D, \u201CArial\u201D, sans-serif;\n  -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n  -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n  box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n}\n.yoda-banner {\n  background: #ffffff;\n  padding: 20px;\n  text-align: left;\n  font-family: "Lato", \u201CHelveticaNeue\u201D, \u201CHelvetica\u201D, \u201CArial\u201D, sans-serif;\n  -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n  -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n  box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n}\n.yoda-toast {\n  position: absolute;\n  background: #ffffff;\n  padding: 20px;\n  max-width: 400px;\n  text-align: left;\n  border-radius: 5px 5px 0px 0px;\n  font-family: "Lato", \u201CHelveticaNeue\u201D, \u201CHelvetica\u201D, \u201CArial\u201D, sans-serif;\n  -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n  -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n  box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n  bottom:0px;\n  right:5px;\n  z-index: 100;\n}\n.banner-bottom {\n  position: absolute;\n  bottom:0;\n  max-width: none;\n  width: 90%;\n  margin-left: auto;\n  margin-right: auto;\n  min-width: 400px;\n  border-radius: 5px 5px 0px 0px;\n}\n\n.banner-top {\n  position: absolute;\n  top:0;\n  max-width: none;\n  width: 90%;\n  margin-left: auto;\n  margin-right: auto;\n  min-width: 400px;\n  border-radius: 0px 0px 5px 5px;\n  \n}\n.yoda-popper .close {\n  border: none;\n  text-decoration: none;\n  font-size: 1rem;\n  float: right;\n  color: grey;\n}\n.yoda-popper .close:hover {\n  color: black;\n  \n}\n.yoda-popper .popper__arrow {\n  width: 0;\n  height: 0;\n  border-style: solid;\n  position: absolute;\n  margin: 5px;\n}\n\n.yoda-popper[x-placement^=top] {\n  margin-bottom: 5px;\n}\n.yoda-popper[x-placement^=top] .popper__arrow {\n  border-width: 5px 5px 0 5px;\n  border-color: #ffffff transparent transparent transparent;\n  bottom: -5px;\n  left: calc(50% - 5px);\n  margin-top: 0;\n  margin-bottom: 0;\n}\n\n.yoda-popper[x-placement^=bottom] {\n  margin-top: 5px;\n}\n.yoda-popper[x-placement^=bottom] .popper__arrow {\n  border-width: 0 5px 5px 5px;\n  border-color: transparent transparent #ffffff transparent;\n  top: -5px;\n  left: calc(50% - 5px);\n  margin-top: 0;\n  margin-bottom: 0;\n}\n\n.yoda-popper[x-placement^=right] {\n  margin-left: 5px;\n}\n.yoda-popper[x-placement^=right] .popper__arrow {\n  border-width: 5px 5px 5px 0;\n  border-color: transparent #ffffff transparent transparent;\n  left: -5px;\n  top: calc(50% - 5px);\n  margin-left: 0;\n  margin-right: 0;\n}\n\n.yoda-popper[x-placement^=left] {\n  margin-right: 5px;\n}\n.yoda-popper[x-placement^=left] .popper__arrow {\n  border-width: 5px 0 5px 5px;\n  border-color: transparent transparent transparent #ffffff;\n  right: -5px;\n  top: calc(50% - 5px);\n  margin-left: 0;\n  margin-right: 0;\n}\n\n.yoda-popper .previous {\n  float: left;\n  margin-right: 5px;\n}\n\n.yoda-popper .next {\n  float: right\n}\n\n.yoda-popper .content {\n  margin: 0 0 6px 0;\n  padding: 0;\n  margin-top: 4px;\n  font-size: 1rem;\n  letter-spacing: .01rem;\n  font-weight: 300;\n  margin-bottom: 10px;\n}\n\n.yoda-popper .header {\n  font-size: 20px;\n  margin-bottom: 25px;\n  font-weight: 550;\n  color: #61b8d4;\n}\n\n.yoda-popper .finish {\n  float: left\n}\n      </style>').appendTo("head");
-	    }
-	  }, {
-	    key: 'init',
-	    value: function init(getDataFromApp, apiHost) {
-	      var _this3 = this;
+	    }, {
+	        key: 'update',
+	        value: function update(filterGuides, page) {
+	            var _this3 = this;
 	
-	      this.apiHost = apiHost;
+	            if (this.guideIndex > 0) return; //ignore if we're in the middle of a guide, dont mount another popover
 	
-	      this.sendReady();
+	            this.fetchGuide(this.userHash, this.locale, page).then(function (fetchedGuides) {
+	                _this3.guideIndex = 0;
+	                return filterGuides(fetchedGuides);
+	            }).then(function (filteredGuides) {
+	                _this3.guide = filteredGuides;
+	                _this3.displayPopperWithHtml(_this3.guide, _this3.guideIndex);
+	            });
+	        }
+	    }, {
+	        key: 'displayPopperWithHtml',
+	        value: function displayPopperWithHtml(guide, index) {
+	            var _this4 = this;
 	
-	      getDataFromApp().then(function (dataFromApp) {
-	        var userId = dataFromApp.userId,
-	            locale = dataFromApp.locale;
+	            if (!guide || this.selectMode) return;
+	            var _guide$steps$index = guide.steps[index],
+	                selector = _guide$steps$index.selector,
+	                content = _guide$steps$index.content,
+	                title = _guide$steps$index.title;
 	
+	            //if displyType doesn't require a selector - don't give it one
 	
-	        if (!userId || !locale) {
-	          throw Error('getDataFromApp must return a promise to an object of the form {userId: ___, locale: ___}');
+	            if (guide.displayType === TYPES.TOAST) {
+	                selector = 'body';
+	            }
+	
+	            this.whenExists(selector, function () {
+	                var testReference = $(selector)[0];
+	
+	                var maybePrev = index > 0 ? '<button class="previous btn-sm btn-default">Prev</span>' : '';
+	                var maybeNext = guide.steps.length - 1 > index ? '<button class="next btn-sm btn-primary">Next</span>' : '<button class="finish btn-sm btn-primary">Finish</span>';
+	                var classes = _this4.getClasses(guide);
+	                var popTag = $('<div class="' + classes + '">' + '<div class="header">' + title + '</div>' + '</n>' + '<div class="content">' + content + '</div>' + '<div class=btn-container>' + maybePrev + maybeNext + '</div>' + '<div class="popper__arrow" x-arrow=""></div></div>');
+	
+	                $('body').append(popTag);
+	
+	                popTag.find('.next').on('click', _this4.nextGuide.bind(_this4));
+	                popTag.find('.finish').on('click', _this4.finishGuide.bind(_this4));
+	                popTag.find('.previous').on('click', _this4.previousGuide.bind(_this4));
+	
+	                _this4.currentPop = new _popper2.default(testReference, popTag, {
+	                    placement: 'left',
+	                    removeOnDestroy: true
+	                });
+	            });
+	        }
+	    }, {
+	        key: 'whenExists',
+	        value: function whenExists(selector, cb, waitTime) {
+	            var timesChecked = 0;
+	            var checkExistance = setInterval(function () {
+	                if ($(selector).length) {
+	                    cb();
+	                    clearInterval(checkExistance);
+	                } else {
+	                    timesChecked++;
+	                    if (timesChecked > 200) {
+	                        console.warn('Couldnt find element to attach yoda after 20 seconds, giving up');
+	                        clearInterval(checkExistance);
+	                    }
+	                }
+	            }, 100);
+	        }
+	    }, {
+	        key: 'getClasses',
+	        value: function getClasses(guide) {
+	            var classes = 'yoda-popper';
+	            switch (guide.displayType) {
+	                case TYPES.DEFAULT:
+	                    classes += ' yoda-announcement';
+	                    break;
+	                case TYPES.TOAST:
+	                    classes += ' yoda-toast';
+	                    break;
+	                case TYPES.BOTTOM:
+	                    classes += ' yoda-banner banner-top';
+	                    break;
+	                case TYPES.TOP:
+	                    classes += ' yoda-banner banner-top';
+	                    break;
+	            }
+	            return classes;
+	        }
+	    }, {
+	        key: 'setupStyles',
+	        value: function setupStyles() {
+	            $('<style type=\'text/css\'>\n        .btn-primary {\n            background-color: transparent;\n            border-color: #94c5d6;\n            color: #ffffff;\n            text-shadow: none;\n            background-image: -webkit-linear-gradient(top, #61b8d4 0%, #4a9cb6 100%);\n            background-image: linear-gradient(to bottom, #00b4d0 0%, #4a9cb6 150%)\n            background-repeat: repeat-x;\n        }\n        .btn-sm {\n            padding: 5px 10px;\n            font-size: 14px;\n            line-height: 1.5;\n            border-radius: 3px;\n            margin-top: 20px;\n        }\n        .spacer {\n            padding: 10px\n        }\n        .btn-default {\n            border-color: #b8b8b8;\n            color: #333333;\n            text-shadow: none;\n            background-image: -webkit-linear-gradient(top, #f7f7f7 0%, #e5e5e5 100%);\n            background-image: linear-gradient(to bottom, #00b4d0 0%, #4a9cb6 150%)\n            background-repeat: repeat-x;\n        }\n        .btn-container {\n            width: 100%;\n        }\n        .yoda-annoucement {\n          background: #ffffff;\n          padding: 20px;\n          max-width: 400px;\n          min-width: 400px;\n          text-align: left;\n          border-radius: 5px;\n          font-family: "Lato", \u201CHelveticaNeue\u201D, \u201CHelvetica\u201D, \u201CArial\u201D, sans-serif;\n          -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n          -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n          box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n        }\n        .yoda-banner {\n          background: #ffffff;\n          padding: 20px;\n          text-align: left;\n          font-family: "Lato", \u201CHelveticaNeue\u201D, \u201CHelvetica\u201D, \u201CArial\u201D, sans-serif;\n          -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n          -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n          box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n        }\n        .yoda-toast {\n          position: absolute;\n          background: #ffffff;\n          padding: 20px;\n          max-width: 400px;\n          text-align: left;\n          border-radius: 5px 5px 0px 0px;\n          font-family: "Lato", \u201CHelveticaNeue\u201D, \u201CHelvetica\u201D, \u201CArial\u201D, sans-serif;\n          -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n          -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n          box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);\n          bottom:0px;\n          right:5px;\n          z-index: 100;\n        }\n        .yoda-toast .popper__arrow { display: none }\n        .banner-bottom {\n          position: absolute;\n          bottom:0;\n          max-width: none;\n          width: 90%;\n          margin-left: auto;\n          margin-right: auto;\n          min-width: 400px;\n          border-radius: 5px 5px 0px 0px;\n        }\n\n        .banner-top {\n          position: absolute;\n          top:0;\n          max-width: none;\n          width: 90%;\n          margin-left: auto;\n          margin-right: auto;\n          min-width: 400px;\n          border-radius: 0px 0px 5px 5px;\n\n        }\n        .yoda-popper .close {\n          border: none;\n          text-decoration: none;\n          font-size: 1rem;\n          float: right;\n          color: grey;\n        }\n        .yoda-popper .close:hover {\n          color: black;\n\n        }\n        .yoda-popper .popper__arrow {\n          width: 0;\n          height: 0;\n          border-style: solid;\n          position: absolute;\n          margin: 5px;\n        }\n\n        .yoda-popper[x-placement^=top] {\n          margin-bottom: 5px;\n        }\n        .yoda-popper[x-placement^=top] .popper__arrow {\n          border-width: 5px 5px 0 5px;\n          border-color: #ffffff transparent transparent transparent;\n          bottom: -5px;\n          left: calc(50% - 5px);\n          margin-top: 0;\n          margin-bottom: 0;\n        }\n\n        .yoda-popper[x-placement^=bottom] {\n          margin-top: 5px;\n        }\n        .yoda-popper[x-placement^=bottom] .popper__arrow {\n          border-width: 0 5px 5px 5px;\n          border-color: transparent transparent #ffffff transparent;\n          top: -5px;\n          left: calc(50% - 5px);\n          margin-top: 0;\n          margin-bottom: 0;\n        }\n\n        .yoda-popper[x-placement^=right] {\n          margin-left: 5px;\n        }\n        .yoda-popper[x-placement^=right] .popper__arrow {\n          border-width: 5px 5px 5px 0;\n          border-color: transparent #ffffff transparent transparent;\n          left: -5px;\n          top: calc(50% - 5px);\n          margin-left: 0;\n          margin-right: 0;\n        }\n\n        .yoda-popper[x-placement^=left] {\n          margin-right: 5px;\n        }\n        .yoda-popper[x-placement^=left] .popper__arrow {\n          border-width: 5px 0 5px 5px;\n          border-color: transparent transparent transparent #ffffff;\n          right: -5px;\n          top: calc(50% - 5px);\n          margin-left: 0;\n          margin-right: 0;\n        }\n\n        .yoda-popper .previous {\n          float: left;\n          margin-right: 5px;\n        }\n\n        .yoda-popper .next {\n          float: right\n        }\n\n        .yoda-popper .content {\n          margin: 0 0 6px 0;\n          padding: 0;\n          margin-top: 4px;\n          font-size: 1rem;\n          letter-spacing: .01rem;\n          font-weight: 300;\n          margin-bottom: 10px;\n        }\n\n        .yoda-popper .header {\n          font-size: 20px;\n          margin-bottom: 25px;\n          font-weight: 550;\n          color: #61b8d4;\n        }\n\n        .yoda-popper .finish {\n          float: left\n        }\n        </style>').appendTo("head");
+	        }
+	    }, {
+	        key: 'nextGuide',
+	        value: function nextGuide() {
+	            this.guideIndex++;
+	            if (this.currentPop && !this.currentPop.state.isDestroyed) {
+	                this.currentPop.destroy();
+	            }
+	            this.displayPopperWithHtml(this.guide, this.guideIndex);
+	        }
+	    }, {
+	        key: 'finishGuide',
+	        value: function finishGuide() {
+	            this.currentPop.destroy();
+	            $.ajax({
+	                type: 'POST',
+	                url: this.apiHost + '/guides/' + this.guide.id,
+	                data: JSON.stringify({
+	                    user_id: this.userHash,
+	                    completed: true
+	                }),
+	                dataType: 'json',
+	                contentType: 'application/json; charset=utf-8'
+	            });
+	
+	            this.guideIndex = 0; // reset for new guide
+	            // dont get the next guide yet - after demo we make this happen
+	            // .then(() => {
+	            //   this.update()
+	            // })
+	        }
+	    }, {
+	        key: 'previousGuide',
+	        value: function previousGuide() {
+	            this.guideIndex--;
+	            if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
+	            this.displayPopperWithHtml(this.guide, this.guideIndex);
 	        }
 	
-	        _this3.userHash = (0, _md.calcMD5)(userId);
-	        _this3.locale = locale;
+	        ////
+	        // SETTING UP SELECTORS
+	        ////
 	
-	        yoda.setupStyles();
-	        // this.fetchGuide(this.userHash, this.permissions, this.locale).then( (fetchedGuide) => {
-	        //   this.guideIndex = 0;
-	        //   this.guide = fetchedGuide;
-	        //   this.displayPopperWithHtml(this.guide, this.guideIndex);
-	        //   // this.enterElementHighlightMode();
-	        // });
-	      });
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update(filterGuides, page) {
-	      var _this4 = this;
+	    }, {
+	        key: 'sendReady',
+	        value: function sendReady() {
+	            parent.postMessage({ yodaMessage: 'iframe-ready' }, '*');
 	
-	      if (this.guideIndex > 0) return; //ignore if we're in the middle of a guide, dont mount another popover
-	
-	      this.fetchGuide(this.userHash, this.locale, page).then(function (fetchedGuides) {
-	        _this4.guideIndex = 0;
-	        return filterGuides(fetchedGuides);
-	      }).then(function (filteredGuides) {
-	        _this4.guide = filteredGuides;
-	        _this4.displayPopperWithHtml(_this4.guide, _this4.guideIndex);
-	      });
-	    }
-	  }, {
-	    key: 'nextGuide',
-	    value: function nextGuide() {
-	      this.guideIndex++;
-	      if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
-	      this.displayPopperWithHtml(this.guide, this.guideIndex);
-	    }
-	  }, {
-	    key: 'finishGuide',
-	    value: function finishGuide() {
-	      this.currentPop.destroy();
-	      $.ajax({
-	        type: 'POST',
-	        url: this.apiHost + '/guides/' + this.guide.id,
-	        data: JSON.stringify({
-	          user_id: this.userHash,
-	          completed: true
-	        }),
-	        dataType: 'json',
-	        contentType: 'application/json; charset=utf-8'
-	      });
-	
-	      this.guideIndex = 0; // reset for new guide
-	      // dont get the next guide yet - after demo we make this happen
-	      // .then(() => {
-	      //   this.update()
-	      // })
-	    }
-	  }, {
-	    key: 'previousGuide',
-	    value: function previousGuide() {
-	      this.guideIndex--;
-	      if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
-	      this.displayPopperWithHtml(this.guide, this.guideIndex);
-	    }
-	
-	    ////
-	    // SETTING UP SELECTORS
-	    ////
-	
-	  }, {
-	    key: 'sendReady',
-	    value: function sendReady() {
-	      parent.postMessage({ yodaMessage: 'iframe-ready' }, '*');
-	
-	      // Listen for select mode
-	      window.addEventListener('message', this.receiveMessage.bind(this), false);
-	    }
-	  }, {
-	    key: 'receiveMessage',
-	    value: function receiveMessage(_ref) {
-	      var data = _ref.data;
-	      var yodaMessage = data.yodaMessage;
-	
-	      if (yodaMessage === 'select-mode') {
-	        this.selectMode = true;
-	        console.log('Enable "select-mode" postmessage received.');
-	        if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
-	        this.enterElementHighlightMode();
-	      }
-	      if (yodaMessage === 'clear-pops') {
-	        this.selectMode = true;
-	        console.log('"clear-pops" postmessage received.');
-	        if (this.currentPop && !this.currentPop.state.isDestroyed) this.currentPop.destroy();
-	      }
-	
-	      if (yodaMessage === 'init') {
-	        this.sendReady();
-	      }
-	    }
-	  }, {
-	    key: 'enterElementHighlightMode',
-	    value: function enterElementHighlightMode() {
-	      var cssPath = function cssPath(el) {
-	        if (!(el instanceof Element)) return;
-	        var path = [];
-	        while (el.nodeType === Node.ELEMENT_NODE) {
-	          var selector = el.nodeName.toLowerCase();
-	          var tagName = selector;
-	          if (el.classList.length) {
-	            selector += '.' + Array.from(el.classList).join('.');
-	          }
-	          var sib = el,
-	              nth = 1;
-	          while (sib = sib.previousElementSibling) {
-	            if (sib.nodeName.toLowerCase() === tagName) nth++;
-	          }
-	          if (nth != 1) {
-	            selector += ":nth-of-type(" + nth + ")";
-	          }
-	          path.unshift(selector);
-	          el = el.parentNode;
+	            // Listen for select mode
+	            window.addEventListener('message', this.receiveMessage.bind(this), false);
 	        }
-	        var fullSelector = path.join(" > ");
-	        return fullSelector;
-	      };
+	    }, {
+	        key: 'receiveMessage',
+	        value: function receiveMessage(_ref) {
+	            var data = _ref.data;
+	            var yodaMessage = data.yodaMessage;
 	
-	      var previousEl = null;
-	      var previousBackground = null;
-	      $(document).on('mousemove', function (_ref2) {
-	        var clientX = _ref2.clientX,
-	            clientY = _ref2.clientY;
+	            if (yodaMessage === 'select-mode') {
+	                this.selectMode = true;
+	                console.log('Enable "select-mode" postmessage received.');
+	                if (this.currentPop && !this.currentPop.state.isDestroyed) {
+	                    this.currentPop.destroy();
+	                }
+	                this.enterElementHighlightMode();
+	            }
+	            if (yodaMessage === 'clear-pops') {
+	                this.selectMode = true;
+	                console.log('"clear-pops" postmessage received.');
+	                if (this.currentPop && !this.currentPop.state.isDestroyed) {
+	                    this.currentPop.destroy();
+	                }
+	            }
 	
-	        var el = $(document.elementFromPoint(clientX, clientY));
-	        if (previousEl) {
-	          previousEl.css('background', previousBackground);
+	            if (yodaMessage === 'init') {
+	                this.sendReady();
+	            }
 	        }
-	        previousBackground = el.css('background');
-	        el.css('background', 'lightskyblue');
-	        previousEl = el;
-	      });
+	    }, {
+	        key: 'enterElementHighlightMode',
+	        value: function enterElementHighlightMode() {
+	            var cssPath = function cssPath(el) {
+	                if (!(el instanceof Element)) return;
+	                var path = [];
+	                while (el.nodeType === Node.ELEMENT_NODE) {
+	                    var selector = el.nodeName.toLowerCase();
+	                    var tagName = selector;
+	                    if (el.classList.length) {
+	                        selector += '.' + Array.from(el.classList).join('.');
+	                    }
+	                    var sib = el,
+	                        nth = 1;
+	                    while (sib = sib.previousElementSibling) {
+	                        if (sib.nodeName.toLowerCase() === tagName) nth++;
+	                    }
+	                    if (nth != 1) {
+	                        selector += ":nth-of-type(" + nth + ")";
+	                    }
+	                    path.unshift(selector);
+	                    el = el.parentNode;
+	                }
+	                var fullSelector = path.join(" > ");
+	                return fullSelector;
+	            };
 	
-	      $(document).on('click', function (e) {
-	        parent.postMessage({
-	          yodaMessage: 'return-selector',
-	          yodaMessageSelector: cssPath(previousEl[0])
-	        }, '*');
-	        e.stopPropagation();
-	        e.preventDefault();
-	        $(document).off('click');
-	        $(document).off('mousemove');
-	        previousEl.css('background', previousBackground);
-	      });
-	    }
-	  }]);
+	            var previousEl = null;
+	            var previousBackground = null;
+	            $(document).on('mousemove', function (_ref2) {
+	                var clientX = _ref2.clientX,
+	                    clientY = _ref2.clientY;
 	
-	  return YodaGuides;
+	                var el = $(document.elementFromPoint(clientX, clientY));
+	                if (previousEl) {
+	                    previousEl.css('background', previousBackground);
+	                }
+	                previousBackground = el.css('background');
+	                el.css('background', 'lightskyblue');
+	                previousEl = el;
+	            });
+	
+	            $(document).on('click', function (e) {
+	                parent.postMessage({
+	                    yodaMessage: 'return-selector',
+	                    yodaMessageSelector: cssPath(previousEl[0])
+	                }, '*');
+	                e.stopPropagation();
+	                e.preventDefault();
+	                $(document).off('click');
+	                $(document).off('mousemove');
+	                previousEl.css('background', previousBackground);
+	            });
+	        }
+	    }]);
+	
+	    return YodaGuides;
 	}();
 	
 	window.Yoda = new YodaGuides();
