@@ -2,7 +2,7 @@ import {calcMD5} from './md5';
 import Popper from 'popper.js';
 
 class YodaGuides {
-  fetchGuide(userHash, locale) {
+  fetchGuide(userHash, locale, page) {
     if (this.guidesFetched) {
       return Promise.resolve(this.guides[0])
     }
@@ -16,7 +16,7 @@ class YodaGuides {
       url: this.apiHost + '/guides',
       data: JSON.stringify({
         'user_id': userHash,
-        route: location.pathname + location.hash,
+        route: page,
         locale: locale
       }),
       dataType: 'json',
@@ -308,10 +308,10 @@ class YodaGuides {
     });
   }
 
-  update(filterGuides) {
+  update(filterGuides, page) {
     if (this.guideIndex > 0) return //ignore if we're in the middle of a guide, dont mount another popover
 
-    this.fetchGuide(this.userHash, this.locale).then( (fetchedGuides) => {
+    this.fetchGuide(this.userHash, this.locale, page).then( (fetchedGuides) => {
       this.guideIndex = 0;
       return filterGuides(fetchedGuides);
     }).then( (filteredGuides) => {
