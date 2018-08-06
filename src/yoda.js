@@ -66,13 +66,16 @@ class YodaGuides {
 
     displayPopperWithHtml(guide, index) {
         if (!guide || this.selectMode) return
-            let {selector, content, title} = guide.steps[index]
-    
+        
+        let {selector, content, title} = guide.steps[index]
+        let placement = 'left';
+        let fixed = false;
         //if displyType doesn't require a selector - don't give it one
         if (guide.displayType === TYPES.TOAST) {
-            selector = 'body';
-        }
-
+            selector = 'html';
+            placement = 'top-end';
+            fixed = true;
+        } 
         this.whenExists(selector, () => {
             let testReference = $(selector)[0]
 
@@ -100,7 +103,8 @@ class YodaGuides {
             popTag.find('.previous').on('click', this.previousGuide.bind(this));
 
             this.currentPop = new Popper(testReference, popTag, {
-                placement: 'left',
+                placement: placement,
+                positionFixed: fixed,
                 removeOnDestroy: true
             });
         });
@@ -196,7 +200,6 @@ class YodaGuides {
           box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
         }
         .yoda-toast {
-          position: absolute;
           background: #ffffff;
           padding: 20px;
           max-width: 400px;
@@ -206,9 +209,7 @@ class YodaGuides {
           -webkit-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
           -moz-box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
           box-shadow: 5px 5px 42px -4px rgba(0,0,0,0.5);
-          bottom:0px;
-          right:5px;
-          z-index: 100;
+          z-index: 5000;
         }
         .yoda-toast .popper__arrow { display: none }
         .banner-bottom {
@@ -329,6 +330,8 @@ class YodaGuides {
         .yoda-popper .finish {
           float: left
         }
+
+        .yoda-popper { height: auto; }
         </style>`).appendTo("head");
     }
 
