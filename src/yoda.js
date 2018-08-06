@@ -390,6 +390,12 @@ class YodaGuides {
             } 
             this.enterElementHighlightMode();
         }
+        if (yodaMessage === 'url-mode') {
+          parent.postMessage({
+            yodaMessageUrl: location.pathname + location.hash,
+            yodaMessage: 'return-url'
+          }, '*');
+        }
         if (yodaMessage === 'clear-pops') {
             this.selectMode = true;
             console.log('"clear-pops" postmessage received.');
@@ -406,7 +412,8 @@ class YodaGuides {
     _onClickHighlightedElement(e) {
       parent.postMessage({
           yodaMessage: 'return-selector',
-          yodaMessageSelector: this._cssPath(this.previousEl[0])
+          yodaMessageSelector: this._cssPath(this.previousEl[0]),
+          yodaMessageUrl: location.pathname + location.hash,
       }, '*');
       e.stopPropagation();
       e.preventDefault();
