@@ -400,55 +400,79 @@ class YodaGuides {
         }
     }
 
-    enterElementHighlightMode() {
-        let cssPath = function(el) {
-            if (!(el instanceof Element))
-                return;
-            let path = [];
-            while (el.nodeType === Node.ELEMENT_NODE) {
-                let selector = el.nodeName.toLowerCase();
-                let tagName = selector;
-                if (el.classList.length) {
-                    selector += '.' + Array.from(el.classList).join('.');
-                }
-                var sib = el, nth = 1;
-                while (sib = sib.previousElementSibling) {
-                    if (sib.nodeName.toLowerCase() === tagName)
-                        nth++;
-                }
-                if (nth != 1) {
-                    selector += ":nth-of-type("+nth+")";
-                }
-                path.unshift(selector);
-                el = el.parentNode;
-            }
-            let fullSelector = path.join(" > ");
-            return fullSelector;
+    _onClickHighlightedElement(e) {
+      parent.postMessage({
+          yodaMessage: 'return-selector',
+          yodaMessageSelector: this._cssPath(this.previousEl[0])
+      }, '*');
+      e.stopPropagation();
+      e.preventDefault();
+      $(document).off('mousemove');
+      this.previousEl.css('background', this.previousBackground);
+    }
+
+    _selectorIsUnique(selector) {
+      if($(selector).length <= 1) {
+        if($(selector).length === 0) {
+          throw Error('Selector does\'nt match any elements');
+        } else {
+          return true;
+        }
+      } else {
+        return false;
+      }
+    }
+
+    _cssPath(el) {
+      if (!(el instanceof Element))
+        return;
+      let path = '';
+      let needsMoreSpecificity = true;
+      while (needsMoreSpecificity && el.nodeType === Node.ELEMENT_NODE) {
+        let selector = el.nodeName.toLowerCase();
+        let tagName = selector;
+        if (el.classList.length) {
+          selector += '.' + Array.from(el.classList).join('.');
+        }
+        var sib = el, nth = 1;
+        while (sib = sib.previousElementSibling) {
+          if (sib.nodeName.toLowerCase() === tagName)
+            nth++;
+        }
+        if (nth != 1) {
+          selector += ":nth-of-type("+nth+")";
+        }
+        path = selector + path;
+
+        // See if this selector is sufficient to uniquely select the element we want
+        if(this._selectorIsUnique(path)) {
+          break;
+        
+        // If not, we'll include information from the parent
+        } else {
+          path = ' > ' + path;
         }
 
-        let previousEl = null;
-        let previousBackground = null
-        $(document).on('mousemove', ({clientX, clientY}) => {
-            let el = $(document.elementFromPoint(clientX, clientY));
-            if (previousEl) {
-                previousEl.css('background', previousBackground);
-            }
-            previousBackground = el.css('background');
-            el.css('background', 'lightskyblue');
-            previousEl = el;
-        })
+        // Move up to the next parent and continue to build selector
+        el = el.parentNode;
+      }
+      return path;
+    }
 
-        $(document).on('click', (e) => {
-            parent.postMessage({
-                yodaMessage: 'return-selector',
-                yodaMessageSelector: cssPath(previousEl[0])
-            }, '*');
-            e.stopPropagation();
-            e.preventDefault();
-            $(document).off('click');
-            $(document).off('mousemove');
-            previousEl.css('background', previousBackground);
-        })
+    enterElementHighlightMode() {
+      this.previousEl = null;
+      this.previousBackground = null
+      $(document).on('mousemove', ({clientX, clientY}) => {
+        let el = $(document.elementFromPoint(clientX, clientY));
+        if (this.previousEl) {
+          this.previousEl.css('background', this.previousBackground);
+          this.previousEl.off('click', this._onClickHighlightedElement);
+        }
+        this.previousBackground = el.css('background');
+        el.css('background', 'lightskyblue');
+        el.on('click', this._onClickHighlightedElement.bind(this));
+        this.previousEl = el;
+      })
     }
 
 }
