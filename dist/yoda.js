@@ -316,7 +316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            parent.postMessage({
 	                yodaMessage: 'return-selector',
 	                yodaMessageSelector: this._cssPath(this.previousEl[0]),
-	                yodaMessageUrl: location.pathname + location.hash
+	                yodaMessageUrl: location.pathname + '/' + location.hash
 	            }, '*');
 	            e.stopPropagation();
 	            e.preventDefault();
