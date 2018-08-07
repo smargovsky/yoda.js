@@ -392,7 +392,7 @@ class YodaGuides {
         }
         if (yodaMessage === 'url-mode') {
           parent.postMessage({
-            yodaMessageUrl: location.pathname + location.hash,
+            yodaMessageUrl: location.pathname + '/' + location.hash,
             yodaMessage: 'return-url'
           }, '*');
         }
@@ -413,7 +413,7 @@ class YodaGuides {
       parent.postMessage({
           yodaMessage: 'return-selector',
           yodaMessageSelector: this._cssPath(this.previousEl[0]),
-          yodaMessageUrl: location.pathname + location.hash,
+          yodaMessageUrl: location.pathname + '/' + location.hash,
       }, '*');
       e.stopPropagation();
       e.preventDefault();
