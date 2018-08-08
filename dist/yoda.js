@@ -313,15 +313,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: '_onClickHighlightedElement',
 	        value: function _onClickHighlightedElement(e) {
-	            parent.postMessage({
-	                yodaMessage: 'return-selector',
-	                yodaMessageSelector: this._cssPath(this.previousEl[0]),
-	                yodaMessageUrl: location.pathname + location.hash
-	            }, '*');
+	            var _this5 = this;
+	
 	            e.stopPropagation();
 	            e.preventDefault();
-	            $(document).off('mousemove');
-	            this.previousEl.css('background', this.previousBackground);
+	
+	            // Debounce to prevent multiple triggers of these actions
+	            if (!this._onClickHighlightedElementRunRecently) {
+	                $(document).off('mousemove');
+	                this.previousEl.css('background', this.previousBackground);
+	                parent.postMessage({
+	                    yodaMessage: 'return-selector',
+	                    yodaMessageSelector: this._cssPath(this.previousEl[0]),
+	                    yodaMessageUrl: location.pathname + location.hash
+	                }, '*');
+	                // Some debounce logic
+	                this._onClickHighlightedElementRunRecently = true;
+	                setTimeout(function () {
+	                    _this5._onClickHighlightedElementRunRecently = false;
+	                }, 200);
+	            }
 	        }
 	    }, {
 	        key: '_selectorIsUnique',
@@ -341,13 +352,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _cssPath(el) {
 	            if (!(el instanceof Element)) return;
 	            var path = '';
-	            var needsMoreSpecificity = true;
-	            while (needsMoreSpecificity && el.nodeType === Node.ELEMENT_NODE) {
-	                var selector = el.nodeName.toLowerCase();
+	            var selector = '';
+	            while (el.nodeType === Node.ELEMENT_NODE) {
+	                selector = el.nodeName.toLowerCase();
 	                var tagName = selector;
-	                if (el.classList.length) {
-	                    selector += '.' + Array.from(el.classList).join('.');
+	
+	                // Try data-t first, often enough specificity right off the bat
+	                var dataT = $(el).attr('data-t');
+	                if (dataT) {
+	                    selector += '[data-t=\'' + dataT + '\']';
 	                }
+	                if (this._selectorIsUnique('' + selector + (path ? ' > ' : '') + path)) {
+	                    break;
+	                }
+	
+	                // Add classes of this element until we find one
+	                var classNamesAreSufficient = void 0,
+	                    i = 0;
+	                while (!classNamesAreSufficient && el.classList.length > i) {
+	                    selector += '.' + el.classList[i];
+	                    if (this._selectorIsUnique('' + selector + (path ? ' > ' : '') + path)) {
+	                        classNamesAreSufficient = true;
+	                    } else {
+	                        classNamesAreSufficient = false;
+	                    }
+	                    i++;
+	                }
+	                if (classNamesAreSufficient) {
+	                    break;
+	                }
+	
 	                var sib = el,
 	                    nth = 1;
 	                while (sib = sib.previousElementSibling) {
@@ -356,7 +390,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (nth != 1) {
 	                    selector += ":nth-of-type(" + nth + ")";
 	                }
-	                path = selector + path;
 	
 	                // See if this selector is sufficient to uniquely select the element we want
 	                if (this._selectorIsUnique(path)) {
@@ -364,18 +397,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	                    // If not, we'll include information from the parent
 	                } else {
-	                    path = ' > ' + path;
+	                    path = selector + ' > ' + path;
 	                }
 	
 	                // Move up to the next parent and continue to build selector
 	                el = el.parentNode;
 	            }
+	            path = selector + path;
 	            return path;
 	        }
 	    }, {
 	        key: 'enterElementHighlightMode',
 	        value: function enterElementHighlightMode() {
-	            var _this5 = this;
+	            var _this6 = this;
 	
 	            this.previousEl = null;
 	            this.previousBackground = null;
@@ -384,14 +418,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    clientY = _ref2.clientY;
 	
 	                var el = $(document.elementFromPoint(clientX, clientY));
-	                if (_this5.previousEl) {
-	                    _this5.previousEl.css('background', _this5.previousBackground);
-	                    _this5.previousEl.off('click', _this5._onClickHighlightedElement);
+	                if (_this6.previousEl) {
+	                    _this6.previousEl.css('background', _this6.previousBackground);
+	                    _this6.previousEl.off('click', _this6._onClickHighlightedElement);
 	                }
-	                _this5.previousBackground = el.css('background');
+	                _this6.previousBackground = el.css('background');
 	                el.css('background', 'lightskyblue');
-	                el.on('click', _this5._onClickHighlightedElement.bind(_this5));
-	                _this5.previousEl = el;
+	                el.on('click', _this6._onClickHighlightedElement.bind(_this6));
+	                _this6.previousEl = el;
 	            });
 	        }
 	    }]);

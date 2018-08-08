@@ -410,15 +410,24 @@ class YodaGuides {
     }
 
     _onClickHighlightedElement(e) {
-      parent.postMessage({
-          yodaMessage: 'return-selector',
-          yodaMessageSelector: this._cssPath(this.previousEl[0]),
-          yodaMessageUrl: location.pathname + location.hash,
-      }, '*');
       e.stopPropagation();
       e.preventDefault();
-      $(document).off('mousemove');
-      this.previousEl.css('background', this.previousBackground);
+
+      // Debounce to prevent multiple triggers of these actions
+      if (!this._onClickHighlightedElementRunRecently) {
+        $(document).off('mousemove');
+        this.previousEl.css('background', this.previousBackground);
+        parent.postMessage({
+            yodaMessage: 'return-selector',
+            yodaMessageSelector: this._cssPath(this.previousEl[0]),
+            yodaMessageUrl: location.pathname + location.hash,
+        }, '*');
+        // Some debounce logic
+        this._onClickHighlightedElementRunRecently = true;
+        setTimeout(() => {
+          this._onClickHighlightedElementRunRecently = false;
+        }, 200)
+      } 
     }
 
     _selectorIsUnique(selector) {
@@ -437,13 +446,35 @@ class YodaGuides {
       if (!(el instanceof Element))
         return;
       let path = '';
-      let needsMoreSpecificity = true;
-      while (needsMoreSpecificity && el.nodeType === Node.ELEMENT_NODE) {
-        let selector = el.nodeName.toLowerCase();
+      let selector = '';
+      while (el.nodeType === Node.ELEMENT_NODE) {
+        selector = el.nodeName.toLowerCase();
         let tagName = selector;
-        if (el.classList.length) {
-          selector += '.' + Array.from(el.classList).join('.');
+
+        // Try data-t first, often enough specificity right off the bat
+        let dataT = $(el).attr('data-t');
+        if (dataT) {
+          selector += `[data-t='${dataT}']`;
         }
+        if (this._selectorIsUnique(`${selector}${path ? ' > ' : ''}${path}`)) {
+          break;
+        }
+        
+        // Add classes of this element until we find one
+        let classNamesAreSufficient, i=0;
+        while(!classNamesAreSufficient && el.classList.length > i) {
+          selector += '.' + el.classList[i];
+          if (this._selectorIsUnique(`${selector}${path ? ' > ' : ''}${path}`)) {
+            classNamesAreSufficient = true;
+          } else {
+            classNamesAreSufficient = false;
+          }
+          i++;
+        } 
+        if (classNamesAreSufficient) {
+          break;
+        }
+
         var sib = el, nth = 1;
         while (sib = sib.previousElementSibling) {
           if (sib.nodeName.toLowerCase() === tagName)
@@ -452,7 +483,6 @@ class YodaGuides {
         if (nth != 1) {
           selector += ":nth-of-type("+nth+")";
         }
-        path = selector + path;
 
         // See if this selector is sufficient to uniquely select the element we want
         if(this._selectorIsUnique(path)) {
@@ -460,12 +490,13 @@ class YodaGuides {
         
         // If not, we'll include information from the parent
         } else {
-          path = ' > ' + path;
+          path = selector + ' > ' + path;
         }
 
         // Move up to the next parent and continue to build selector
         el = el.parentNode;
       }
+      path = selector + path;
       return path;
     }
 

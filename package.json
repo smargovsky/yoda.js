@@ -55,6 +55,7 @@
     "mainVarName": "yoda"
   },
   "dependencies": {
+    "lodash": "^4.17.10",
     "popper.js": "^1.14.3"
   }
 }
