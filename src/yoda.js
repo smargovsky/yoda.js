@@ -2,7 +2,7 @@ import {calcMD5} from './md5';
 import Popper from 'popper.js';
 
 const TYPES = {
-    TOAST: 'toast', 
+    TOAST: 'toast',
     DEFAULT: 'pop-up',
     TOP: 'top',
     BOTTOM: 'bottom'
@@ -66,7 +66,7 @@ class YodaGuides {
 
     displayPopperWithHtml(guide, index) {
         if (!guide || this.selectMode) return
-        
+
         let {selector, content, title} = guide.steps[index]
         let placement = 'left';
         let fixed = false;
@@ -75,7 +75,7 @@ class YodaGuides {
             selector = 'html';
             placement = 'top-end';
             fixed = true;
-        } 
+        }
         this.whenExists(selector, () => {
             let testReference = $(selector)[0]
 
@@ -141,7 +141,7 @@ class YodaGuides {
                 break;
             case TYPES.TOP:
                 classes += ' yoda-banner banner-top';
-                break;   
+                break;
         }
         return classes;
     }
@@ -386,8 +386,8 @@ class YodaGuides {
             this.selectMode = true;
             console.log('Enable "select-mode" postmessage received.');
             if (this.currentPop && !this.currentPop.state.isDestroyed) {
-                this.currentPop.destroy();    
-            } 
+                this.currentPop.destroy();
+            }
             this.enterElementHighlightMode();
         }
         if (yodaMessage === 'url-mode') {
@@ -427,7 +427,7 @@ class YodaGuides {
         setTimeout(() => {
           this._onClickHighlightedElementRunRecently = false;
         }, 200)
-      } 
+      }
     }
 
     _selectorIsUnique(selector) {
@@ -459,7 +459,7 @@ class YodaGuides {
         if (this._selectorIsUnique(`${selector}${path ? ' > ' : ''}${path}`)) {
           break;
         }
-        
+
         // Add classes of this element until we find one
         let classNamesAreSufficient, i=0;
         while(!classNamesAreSufficient && el.classList.length > i) {
@@ -470,7 +470,7 @@ class YodaGuides {
             classNamesAreSufficient = false;
           }
           i++;
-        } 
+        }
         if (classNamesAreSufficient) {
           break;
         }
@@ -487,7 +487,7 @@ class YodaGuides {
         // See if this selector is sufficient to uniquely select the element we want
         if(this._selectorIsUnique(path)) {
           break;
-        
+
         // If not, we'll include information from the parent
         } else {
           path = selector + ' > ' + path;
@@ -517,4 +517,4 @@ class YodaGuides {
     }
 
 }
-window.Yoda = new YodaGuides();
+module.exports = new YodaGuides();
