@@ -1,5 +1,5 @@
 {
-  "name": "yoda",
+  "name": "@purecloud/yoda-guides",
   "version": "0.0.1",
   "description": "Client library for pull data from Yoda WP Plugin and rendering it on your webpage.",
   "main": "dist/yoda.js",
