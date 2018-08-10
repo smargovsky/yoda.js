@@ -33,3 +33,4 @@ yarn.lock
 .lock-wscript
 npm-utils
 dist
+.npmrc
