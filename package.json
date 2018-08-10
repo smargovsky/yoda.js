@@ -9,6 +9,7 @@
     "test-browser": "gulp test-browser",
     "watch": "gulp watch",
     "build": "gulp build",
+    "dist": "gulp jenkins",
     "coverage": "gulp coverage"
   },
   "repository": {
@@ -55,6 +56,7 @@
     "mainVarName": "yoda"
   },
   "dependencies": {
+    "gulp-cli": "^2.0.1",
     "lodash": "^4.17.10",
     "popper.js": "^1.14.3"
   }

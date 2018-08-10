@@ -32,3 +32,4 @@ yarn.lock
 # Users Environment Variables
 .lock-wscript
 npm-utils
+dist
