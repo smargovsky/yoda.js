@@ -75,6 +75,8 @@ class YodaGuides {
             selector = 'html';
             placement = 'top-end';
             fixed = true;
+        } else if (guide.displayType === TYPES.DEFAULT) {
+
         }
         this.whenExists(selector, () => {
             let testReference = $(selector)[0]
@@ -178,7 +180,7 @@ class YodaGuides {
         .btn-container {
             width: 100%;
         }
-        .yoda-annoucement {
+        .yoda-announcement {
           background: #ffffff;
           padding: 20px;
           max-width: 400px;
